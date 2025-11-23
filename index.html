@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#121212" />
+    <title>SpeakUp</title>
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class', // Enable manual dark mode toggling
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                purple: '#6C63FF', // Electric Purple - Primary
+                mint: '#00C896',   // Mint Success - Secondary
+                coral: '#FF6584',  // Warning Coral - Alert/Recording
+                offwhite: '#F8F9FE', // Light Background
+                charcoal: '#2D3436', // Light Text
+              },
+              // Dark Mode Specific Palette
+              dark: {
+                bg: '#121212',      // Soft Black
+                surface: '#1E1E1E', // Dark Grey Cards
+                primary: '#8B85FF', // Lighter Purple for contrast
+                text: '#E0E0E0',    // Ice White
+                accent: '#00E676'   // Neon Mint
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              heading: ['Poppins', 'sans-serif'],
+            },
+            boxShadow: {
+              'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+              'glow-purple': '0 0 20px rgba(108, 99, 255, 0.4)',
+              'glow-coral': '0 0 20px rgba(255, 101, 132, 0.4)',
+              'dark-soft': '0 4px 20px -2px rgba(0, 0, 0, 0.5)', 
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        /* Default colors are handled by React classes now for better switching */
+      }
+      h1, h2, h3, h4, h5, h6 {
+        font-family: 'Poppins', sans-serif;
+      }
+      .mic-pulse {
+        animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+      }
+      .animate-fade-in {
+        animation: fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      @keyframes pulse-ring {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 101, 132, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 25px rgba(255, 101, 132, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 101, 132, 0); }
+      }
+      @keyframes fade-in {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "lucide-react": "https://esm.sh/lucide-react@0.344.0?external=react",
+    "vite": "https://aistudiocdn.com/vite@^7.2.4",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1",
+    "vite-plugin-pwa": "https://aistudiocdn.com/vite-plugin-pwa@^1.1.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="selection:bg-brand-purple selection:text-white">
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>

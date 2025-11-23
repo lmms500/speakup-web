@@ -1,0 +1,7 @@
+{
+  "name": "SpeakUp",
+  "description": "App de treinamento de oratória com análise de IA.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
