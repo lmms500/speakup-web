@@ -1,10 +1,14 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { AnalysisResult, ContextType } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// 🔴 COLE SUA CHAVE AQUI (Tudo na mesma linha):
+const apiKey = "AIzaSyAxD9fO9OSYYEWtVexKYFhToeU1ycU_YTY"; 
 
-// Configuração de Timeout (30 segundos)
-const API_TIMEOUT_MS = 30000;
+// Inicializa a IA
+const genAI = new GoogleGenerativeAI(apiKey);
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+const API_TIMEOUT_MS = 60000;
 
 class AppError extends Error {
   constructor(message: string, public userMessage: string) {
@@ -30,75 +34,46 @@ export const analyzeAudio = async (
   context: ContextType
 ): Promise<AnalysisResult> => {
   
-  // 1. Verificação de Conectividade
   if (!navigator.onLine) {
-    throw new AppError(
-      "Offline",
-      "Parece que você está sem internet. Verifique sua conexão e tente novamente."
-    );
+    throw new AppError("Offline", "Verifique sua conexão.");
   }
 
   try {
     const base64Audio = await blobToBase64(audioBlob);
 
     const prompt = `
-      Você é um coach especialista em oratória. Analise o áudio enviado.
-      Contexto da fala: ${context}.
+      Você é um coach de oratória. Analise este áudio. Contexto: ${context}.
+      Verifique se há fala humana. Se for silêncio/ruído, speech_detected=false.
       
-      IMPORTANTE:
-      1. Verifique se há fala humana inteligível.
-      2. Se houver apenas silêncio ou ruído, defina "speech_detected" como false.
-      3. Se "speech_detected" for false, zere os outros campos.
-      
-      Retorne APENAS JSON.
+      Responda APENAS com este JSON exato, sem markdown:
+      {
+        "speech_detected": boolean,
+        "score": number (0-100),
+        "vicios_linguagem_count": number,
+        "ritmo_analise": "Muito Rápido" | "Lento" | "Ideal",
+        "feedback_positivo": "string",
+        "ponto_melhoria": "string",
+        "frase_reformulada": "string"
+      }
     `;
 
-    // 2. Promise com Timeout (Race Condition)
-    const apiCall = ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: {
-        parts: [
-          { inlineData: { mimeType: 'audio/mp3', data: base64Audio } },
-          { text: prompt }
-        ]
-      },
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            speech_detected: { type: Type.BOOLEAN },
-            score: { type: Type.INTEGER },
-            vicios_linguagem_count: { type: Type.INTEGER },
-            ritmo_analise: { 
-              type: Type.STRING, 
-              enum: ["Muito Rápido", "Lento", "Ideal"] 
-            },
-            feedback_positivo: { type: Type.STRING },
-            ponto_melhoria: { type: Type.STRING },
-            frase_reformulada: { type: Type.STRING }
-          },
-          required: ["speech_detected", "score", "vicios_linguagem_count", "ritmo_analise", "feedback_positivo", "ponto_melhoria", "frase_reformulada"]
+    const result = await model.generateContent([
+      prompt,
+      {
+        inlineData: {
+          mimeType: "audio/mp3",
+          data: base64Audio
         }
       }
-    });
+    ]);
 
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => {
-        reject(new AppError("Timeout", "A análise demorou muito. O servidor pode estar ocupado. Tente um áudio mais curto."));
-      }, API_TIMEOUT_MS);
-    });
+    const response = await result.response;
+    const text = response.text();
+    
+    // Limpa qualquer formatação markdown que a IA possa enviar
+    const cleanJson = text.replace(/```json|```/g, '').trim();
+    const rawResult = JSON.parse(cleanJson);
 
-    // Competição entre a API e o Timeout
-    const response = await Promise.race([apiCall, timeoutPromise]);
-
-    if (!response.text) {
-      throw new AppError("Empty Response", "Não conseguimos receber uma resposta da IA.");
-    }
-
-    const rawResult = JSON.parse(response.text);
-
-    // Adiciona metadados locais antes de retornar
     return {
       ...rawResult,
       id: crypto.randomUUID(),
@@ -107,16 +82,10 @@ export const analyzeAudio = async (
     } as AnalysisResult;
 
   } catch (error: any) {
-    console.error("Error analyzing audio:", error);
-    
-    if (error instanceof AppError) {
-      throw error;
+    console.error("Erro Gemini:", error);
+    if (error.message?.includes("404")) {
+        throw new AppError("Model Error", "Erro de modelo ou chave inválida.");
     }
-    
-    // Tratamento genérico para erros da API do Google
-    throw new AppError(
-      error.message || "Unknown API Error",
-      "Ocorreu um erro inesperado na comunicação com a IA. Tente novamente em instantes."
-    );
+    throw new AppError("Erro na IA", "Não foi possível analisar o áudio.");
   }
 };
