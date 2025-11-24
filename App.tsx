@@ -8,6 +8,8 @@ import { HistoryView } from './components/HistoryView';
 import { HistoryDetailView } from './components/HistoryDetailView';
 import { AudioRecorder } from './components/AudioRecorder';
 import { useTheme } from './context/ThemeContext';
+// Importando o componente de Instalação PWA
+import { InstallPrompt } from './components/InstallPrompt'; 
 import { ChevronDown, Moon, Sun, LayoutGrid, History, Mic, XCircle } from 'lucide-react';
 
 function App() {
@@ -15,7 +17,7 @@ function App() {
   const [appState, setAppState] = useState<AppState>('IDLE');
   const [selectedContext, setSelectedContext] = useState<ContextType>(ContextType.INTERVIEW);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null); // NOVO
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); 
   
   const { theme, toggleTheme } = useTheme();
 
@@ -40,7 +42,7 @@ function App() {
     } catch (error: any) {
       console.error(error);
       const errorMsg = error.userMessage || "Erro ao analisar áudio. Tente novamente.";
-      showError(errorMsg); // Usa o novo Toast
+      showError(errorMsg);
       setAppState('IDLE');
     }
   };
@@ -108,7 +110,7 @@ function App() {
   return (
     <div className="fixed inset-0 flex flex-col items-center bg-brand-offwhite dark:bg-dark-bg text-brand-charcoal dark:text-dark-text overflow-hidden font-sans transition-colors duration-300 selection:bg-brand-purple selection:text-white">
       
-      {/* Toast de Erro (Novo) */}
+      {/* Toast de Erro */}
       {errorMessage && (
         <div className="absolute top-4 left-4 right-4 bg-brand-coral text-white p-4 rounded-xl shadow-lg z-50 animate-fade-in flex items-center gap-3">
           <XCircle size={24} />
@@ -144,6 +146,9 @@ function App() {
           </button>
         </nav>
       )}
+
+      {/* Banner de Instalação PWA */}
+      <InstallPrompt />
     </div>
   );
 }
