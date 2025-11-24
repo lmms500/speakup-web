@@ -6,17 +6,24 @@ export enum ContextType {
 }
 
 export interface AnalysisResult {
-  id: string;        // Identificador único para o histórico
-  audioId?: string;  // ID do áudio no IndexedDB
-  timestamp: number; // Data da gravação
-  context: ContextType; // O contexto escolhido
+  id: string;          // Identificador único
+  audioId?: string;    // ID para recuperar o áudio do banco
+  timestamp: number;   // Data
+  context: ContextType; 
   speech_detected: boolean;
+  
+  // 🔴 NOVO CAMPO OBRIGATÓRIO:
+  transcript: string;  // O texto que a IA transcreveu
+  
   score: number;
   vicios_linguagem_count: number;
   ritmo_analise: 'Muito Rápido' | 'Lento' | 'Ideal';
   feedback_positivo: string;
   ponto_melhoria: string;
   frase_reformulada: string;
+  
+  // Campo opcional para ajudar o Player de áudio na interface
+  audioUrl?: string; 
 }
 
 export interface AnalysisResponse {
@@ -25,10 +32,11 @@ export interface AnalysisResponse {
 }
 
 export type AppState = 'IDLE' | 'RECORDING' | 'ANALYZING' | 'RESULTS';
-export type TabState = 'PRACTICE' | 'HISTORY';
 
-// Novo estado para navegação detalhada
+// Adicionei 'DETAILS' aqui para facilitar a navegação no App.tsx
+export type TabState = 'PRACTICE' | 'HISTORY' | 'DETAILS';
+
 export interface NavigationState {
-  view: TabState | 'DETAILS';
+  view: TabState;
   detailId?: string;
 }

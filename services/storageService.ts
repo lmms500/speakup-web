@@ -5,6 +5,7 @@ const STORAGE_KEY = 'speakup_history_v1';
 
 export const storageService = {
   saveResult: async (result: AnalysisResult, audioBlob?: Blob): Promise<void> => {
+    
     try {
       // 1. Se tiver áudio, salva no IndexedDB usando o ID do resultado
       if (audioBlob) {

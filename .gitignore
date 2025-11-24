@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# ... (mantenha o que já existe)
+
+# Env Files (Adicione isto aqui no final)
+.env
+.env.*
+!.env.example

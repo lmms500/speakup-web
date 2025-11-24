@@ -6,28 +6,35 @@
     <meta name="theme-color" content="#121212" />
     <title>SpeakUp</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+
+    <script>
+      window.process = {
+        env: {
+          NODE_ENV: 'development'
+        }
+      };
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
-        darkMode: 'class', // Enable manual dark mode toggling
+        darkMode: 'class', 
         theme: {
           extend: {
             colors: {
               brand: {
-                purple: '#6C63FF', // Electric Purple - Primary
-                mint: '#00C896',   // Mint Success - Secondary
-                coral: '#FF6584',  // Warning Coral - Alert/Recording
-                offwhite: '#F8F9FE', // Light Background
-                charcoal: '#2D3436', // Light Text
+                purple: '#6C63FF', 
+                mint: '#00C896', 
+                coral: '#FF6584', 
+                offwhite: '#F8F9FE', 
+                charcoal: '#2D3436', 
               },
-              // Dark Mode Specific Palette
               dark: {
-                bg: '#121212',      // Soft Black
-                surface: '#1E1E1E', // Dark Grey Cards
-                primary: '#8B85FF', // Lighter Purple for contrast
-                text: '#E0E0E0',    // Ice White
-                accent: '#00E676'   // Neon Mint
+                bg: '#121212', 
+                surface: '#1E1E1E', 
+                primary: '#8B85FF', 
+                text: '#E0E0E0', 
+                accent: '#00E676' 
               }
             },
             fontFamily: {
@@ -47,7 +54,6 @@
     <style>
       body {
         font-family: 'Inter', sans-serif;
-        /* Default colors are handled by React classes now for better switching */
       }
       h1, h2, h3, h4, h5, h6 {
         font-family: 'Poppins', sans-serif;

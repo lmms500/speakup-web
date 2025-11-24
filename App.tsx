@@ -8,15 +8,22 @@ import { HistoryView } from './components/HistoryView';
 import { HistoryDetailView } from './components/HistoryDetailView';
 import { AudioRecorder } from './components/AudioRecorder';
 import { useTheme } from './context/ThemeContext';
-import { ChevronDown, Moon, Sun, LayoutGrid, History, Mic } from 'lucide-react';
+import { ChevronDown, Moon, Sun, LayoutGrid, History, Mic, XCircle } from 'lucide-react';
 
 function App() {
   const [navState, setNavState] = useState<NavigationState>({ view: 'PRACTICE' });
   const [appState, setAppState] = useState<AppState>('IDLE');
   const [selectedContext, setSelectedContext] = useState<ContextType>(ContextType.INTERVIEW);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // NOVO
   
   const { theme, toggleTheme } = useTheme();
+
+  // Função helper para mostrar erro
+  const showError = (msg: string) => {
+    setErrorMessage(msg);
+    setTimeout(() => setErrorMessage(null), 5000);
+  };
 
   const handleRecordingStop = async (audioBlob: Blob) => {
     setAppState('ANALYZING');
@@ -33,7 +40,7 @@ function App() {
     } catch (error: any) {
       console.error(error);
       const errorMsg = error.userMessage || "Erro ao analisar áudio. Tente novamente.";
-      alert(errorMsg);
+      showError(errorMsg); // Usa o novo Toast
       setAppState('IDLE');
     }
   };
@@ -45,31 +52,18 @@ function App() {
 
   const navigateTo = (view: TabState) => {
     setNavState({ view });
-    if (appState === 'RESULTS' && view === 'HISTORY') {
-       handleRetry();
-    }
+    if (appState === 'RESULTS' && view === 'HISTORY') handleRetry();
   };
 
-  const handleSelectDetail = (id: string) => {
-    setNavState({ view: 'DETAILS', detailId: id });
-  };
-
-  const handleBackFromDetail = () => {
-    setNavState({ view: 'HISTORY' });
-  };
+  const handleSelectDetail = (id: string) => setNavState({ view: 'DETAILS', detailId: id });
+  const handleBackFromDetail = () => setNavState({ view: 'HISTORY' });
 
   const renderContent = () => {
     if (navState.view === 'DETAILS' && navState.detailId) {
       const detailItem = storageService.getById(navState.detailId);
-      if (detailItem) {
-        return <HistoryDetailView result={detailItem} onBack={handleBackFromDetail} />;
-      }
+      if (detailItem) return <HistoryDetailView result={detailItem} onBack={handleBackFromDetail} />;
     }
-
-    if (navState.view === 'HISTORY') {
-      return <HistoryView onSelectDetail={handleSelectDetail} />;
-    }
-
+    if (navState.view === 'HISTORY') return <HistoryView onSelectDetail={handleSelectDetail} />;
     switch (appState) {
       case 'IDLE':
       case 'RECORDING':
@@ -81,7 +75,6 @@ function App() {
                   <p className="text-slate-500 dark:text-slate-400 font-medium text-lg transition-colors">Escolha o cenário.</p>
                 </div>
              )}
-
             {appState === 'IDLE' && (
               <div className="w-full space-y-2 bg-white dark:bg-dark-surface p-1 rounded-2xl shadow-soft dark:shadow-dark-soft transition-all mb-4">
                 <div className="relative group">
@@ -95,30 +88,18 @@ function App() {
                     ))}
                   </select>
                   <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-brand-purple dark:text-dark-primary">
-                    {/* CORREÇÃO DO ÍCONE AQUI: Usando Lucide em vez de SVG manual quebrado */}
                     <ChevronDown size={24} />
                   </div>
                 </div>
               </div>
             )}
-
             <div className="flex-1 flex items-center w-full">
-               <AudioRecorder 
-                 context={selectedContext}
-                 onStop={handleRecordingStop}
-                 onRecordingStart={() => setAppState('RECORDING')}
-               />
+               <AudioRecorder context={selectedContext} onStop={handleRecordingStop} onRecordingStart={() => setAppState('RECORDING')}/>
             </div>
           </div>
         );
-
-      case 'ANALYZING':
-        return <LoadingView />;
-
-      case 'RESULTS':
-        return analysisResult ? (
-          <ResultsView result={analysisResult} onRetry={handleRetry} />
-        ) : null;
+      case 'ANALYZING': return <LoadingView />;
+      case 'RESULTS': return analysisResult ? <ResultsView result={analysisResult} onRetry={handleRetry} /> : null;
     }
   };
 
@@ -126,6 +107,15 @@ function App() {
 
   return (
     <div className="fixed inset-0 flex flex-col items-center bg-brand-offwhite dark:bg-dark-bg text-brand-charcoal dark:text-dark-text overflow-hidden font-sans transition-colors duration-300 selection:bg-brand-purple selection:text-white">
+      
+      {/* Toast de Erro (Novo) */}
+      {errorMessage && (
+        <div className="absolute top-4 left-4 right-4 bg-brand-coral text-white p-4 rounded-xl shadow-lg z-50 animate-fade-in flex items-center gap-3">
+          <XCircle size={24} />
+          <p className="font-medium text-sm">{errorMessage}</p>
+        </div>
+      )}
+
       <header className="w-full px-6 py-4 flex items-center justify-between bg-brand-offwhite dark:bg-dark-bg z-20 flex-shrink-0 transition-colors duration-300">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-brand-purple dark:bg-dark-primary rounded-xl flex items-center justify-center text-white shadow-glow-purple transition-colors">
@@ -133,11 +123,7 @@ function App() {
           </div>
           <h1 className="text-xl font-heading font-bold tracking-tight text-brand-charcoal dark:text-dark-text transition-colors">SpeakUp</h1>
         </div>
-        
-        <button 
-          onClick={toggleTheme}
-          className="p-2 rounded-full bg-white dark:bg-dark-surface text-brand-charcoal dark:text-dark-text shadow-sm transition-all hover:scale-105 active:scale-95"
-        >
+        <button onClick={toggleTheme} className="p-2 rounded-full bg-white dark:bg-dark-surface text-brand-charcoal dark:text-dark-text shadow-sm transition-all hover:scale-105 active:scale-95">
           {theme === 'light' ? <Moon size={24} className="text-brand-purple"/> : <Sun size={24} className="text-yellow-400"/>}
         </button>
       </header>
@@ -148,18 +134,11 @@ function App() {
 
       {showNav && (
         <nav className="w-full max-w-md bg-white dark:bg-dark-surface border-t border-slate-100 dark:border-white/5 flex justify-around py-3 pb-6 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-none z-30 rounded-t-3xl flex-shrink-0 transition-colors duration-300">
-          <button 
-            onClick={() => navigateTo('PRACTICE')}
-            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-colors ${navState.view === 'PRACTICE' ? 'text-brand-purple dark:text-dark-primary' : 'text-slate-400 dark:text-slate-500 hover:text-brand-charcoal dark:hover:text-dark-text'}`}
-          >
+          <button onClick={() => navigateTo('PRACTICE')} className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-colors ${navState.view === 'PRACTICE' ? 'text-brand-purple dark:text-dark-primary' : 'text-slate-400 dark:text-slate-500 hover:text-brand-charcoal dark:hover:text-dark-text'}`}>
             <LayoutGrid size={24} />
             <span className="text-[10px] font-bold uppercase tracking-wide">Praticar</span>
           </button>
-          
-          <button 
-             onClick={() => navigateTo('HISTORY')}
-             className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-colors ${navState.view === 'HISTORY' || navState.view === 'DETAILS' ? 'text-brand-purple dark:text-dark-primary' : 'text-slate-400 dark:text-slate-500 hover:text-brand-charcoal dark:hover:text-dark-text'}`}
-          >
+          <button onClick={() => navigateTo('HISTORY')} className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-colors ${navState.view === 'HISTORY' || navState.view === 'DETAILS' ? 'text-brand-purple dark:text-dark-primary' : 'text-slate-400 dark:text-slate-500 hover:text-brand-charcoal dark:hover:text-dark-text'}`}>
             <History size={24} />
             <span className="text-[10px] font-bold uppercase tracking-wide">Histórico</span>
           </button>
