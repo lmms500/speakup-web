@@ -1,20 +1,16 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { AnalysisResult, ContextType } from "../types";
 
-// 🟢 O JEITO CERTO: Lê a variável de ambiente, não a chave direta
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+// 🔴 1. COLE SUA NOVA CHAVE AQUI:
+const apiKey = "AIzaSyBT4QKRI64magPXyNOK0VXl64RyaIXj_5A"; 
 
-if (!apiKey) {
-  console.error("ERRO: Chave de API não encontrada. Configure VITE_GEMINI_API_KEY.");
-}
+const genAI = new GoogleGenerativeAI(apiKey);
 
-const genAI = new GoogleGenerativeAI(apiKey || "");
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+// 🔴 2. MODELO ATUALIZADO (O 1.5 foi descontinuado):
+// Usamos 'gemini-2.5-flash' que é a versão padrão atual.
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 const API_TIMEOUT_MS = 60000;
-
-// ... (o resto do código continua igual, classe AppError, blobToBase64, etc.) ...
-// Se precisar do resto do arquivo, me avise, mas o importante é o topo acima.
 
 class AppError extends Error {
   constructor(message: string, public userMessage: string) {
@@ -44,30 +40,22 @@ export const analyzeAudio = async (
     throw new AppError("Offline", "Verifique sua conexão.");
   }
 
-  if (!apiKey) {
-    throw new AppError("Config Error", "Chave de API não configurada. Avise o desenvolvedor.");
-  }
-
   try {
     const base64Audio = await blobToBase64(audioBlob);
 
     const prompt = `
-      Você é um coach de oratória. Analise este áudio. Contexto: ${context}.
+      Atue como um coach de oratória. Analise o áudio. Contexto: ${context}.
       
-      TAREFAS:
-      1. Transcreva o áudio fielmente (em português).
-      2. Verifique se há fala humana. Se silêncio/ruído, speech_detected=false.
-      
-      Responda APENAS com este JSON exato, sem markdown:
+      Responda APENAS JSON (sem markdown):
       {
         "speech_detected": boolean,
-        "transcript": "texto completo transcrito aqui",
-        "score": number (0-100),
+        "transcript": "texto transcrito",
+        "score": number,
         "vicios_linguagem_count": number,
-        "ritmo_analise": "Muito Rápido" | "Lento" | "Ideal",
-        "feedback_positivo": "string",
-        "ponto_melhoria": "string",
-        "frase_reformulada": "string"
+        "ritmo_analise": "Ideal",
+        "feedback_positivo": "texto",
+        "ponto_melhoria": "texto",
+        "frase_reformulada": "texto"
       }
     `;
 
@@ -83,7 +71,6 @@ export const analyzeAudio = async (
 
     const response = await result.response;
     const text = response.text();
-    
     const cleanJson = text.replace(/```json|```/g, '').trim();
     const rawResult = JSON.parse(cleanJson);
 
@@ -96,13 +83,18 @@ export const analyzeAudio = async (
 
   } catch (error: any) {
     console.error("Erro Gemini:", error);
+    
+    // Tratamento de erros comuns
     if (error.message?.includes("404")) {
-        throw new AppError("Model Error", "Erro de modelo. Verifique a API Key.");
+        throw new AppError("Model Error", "Erro 404: O modelo 1.5 foi descontinuado. Verifique se o código usa 'gemini-2.5-flash'.");
     }
-    // Tratamento específico para chave vazada/bloqueada
-    if (error.message?.includes("403")) {
-        throw new AppError("Auth Error", "Chave de API bloqueada pelo Google. Gere uma nova.");
+    if (error.message?.includes("503")) {
+        throw new AppError("Busy", "A IA está sobrecarregada (503). Tente novamente em 10 segundos.");
     }
+    if (error.message?.includes("400")) {
+       throw new AppError("Auth Error", "Chave de API inválida ou expirada.");
+    }
+
     throw new AppError("Erro na IA", "Não foi possível analisar o áudio.");
   }
 };
