@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { AnalysisResult } from '../types';
 import { AudioPlayer } from './AudioPlayer';
 import { TranscriptionViewer } from './TranscriptionViewer';
-import { RotateCcw, CheckCircle2, AlertCircle, Sparkles, MicOff, Quote, ChevronDown, ChevronUp } from 'lucide-react';
+// 1. Importando o Modal e o ícone de compartilhamento
+import { ShareModal } from './ShareModal';
+import { RotateCcw, CheckCircle2, AlertCircle, Sparkles, MicOff, Quote, ChevronDown, ChevronUp, Share2 } from 'lucide-react';
 
 interface ResultsViewProps {
   result: AnalysisResult | null;
@@ -13,9 +15,10 @@ interface ResultsViewProps {
 
 export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = false, audioBlob, onRetry }) => {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  
-  // Novo estado para controlar se a transcrição está aberta ou fechada
   const [showTranscript, setShowTranscript] = useState(false);
+  
+  // 2. Novo estado para controlar o Modal de Compartilhamento
+  const [showShareModal, setShowShareModal] = useState(false);
 
   useEffect(() => {
     if (audioBlob) {
@@ -77,7 +80,28 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
   };
 
   return (
-    <div className="w-full max-w-md mx-auto animate-fade-in space-y-6 pb-20 text-brand-charcoal dark:text-dark-text">
+    // 3. Adicionado 'relative' aqui para posicionar o botão de share
+    <div className="w-full max-w-md mx-auto animate-fade-in space-y-6 pb-20 text-brand-charcoal dark:text-dark-text relative">
+      
+      {/* 4. Botão Flutuante de Compartilhar */}
+      <div className="absolute top-0 right-0 z-10">
+        <button 
+          onClick={() => setShowShareModal(true)}
+          className="p-2 bg-white dark:bg-white/10 rounded-full shadow-sm hover:scale-110 transition-transform text-brand-purple dark:text-white border border-slate-100 dark:border-white/10"
+          title="Compartilhar Resultado"
+        >
+          <Share2 size={20} />
+        </button>
+      </div>
+
+      {/* 5. Renderização do Modal */}
+      {showShareModal && (
+        <ShareModal 
+          score={result.score} 
+          context={result.context} 
+          onClose={() => setShowShareModal(false)} 
+        />
+      )}
       
       {/* Placar Circular Animado */}
       <div className="text-center mt-2 relative">
@@ -122,7 +146,6 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
         
         {showTranscript && (
           <div className="px-6 pb-6 animate-fade-in border-t border-slate-100 dark:border-white/5">
-             {/* Passamos o texto real da transcrição aqui */}
              <TranscriptionViewer text={result.transcript || "Transcrição indisponível."} />
           </div>
         )}
