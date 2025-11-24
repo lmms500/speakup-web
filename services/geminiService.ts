@@ -9,7 +9,7 @@ if (!apiKey) {
 }
 
 const genAI = new GoogleGenerativeAI(apiKey || "");
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Use 1.5, é o mais estável
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 const API_TIMEOUT_MS = 60000;
 
