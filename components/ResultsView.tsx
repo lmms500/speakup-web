@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { AnalysisResult } from '../types';
 import { AudioPlayer } from './AudioPlayer';
 import { TranscriptionViewer } from './TranscriptionViewer';
-// 1. Importando o Modal e o ícone de compartilhamento
 import { ShareModal } from './ShareModal';
 import { RotateCcw, CheckCircle2, AlertCircle, Sparkles, MicOff, Quote, ChevronDown, ChevronUp, Share2 } from 'lucide-react';
 
@@ -16,8 +15,6 @@ interface ResultsViewProps {
 export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = false, audioBlob, onRetry }) => {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [showTranscript, setShowTranscript] = useState(false);
-  
-  // 2. Novo estado para controlar o Modal de Compartilhamento
   const [showShareModal, setShowShareModal] = useState(false);
 
   useEffect(() => {
@@ -28,7 +25,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
     }
   }, [audioBlob]);
 
-  // --- SKELETON LOADING STATE ---
+  // --- LOADING STATE ---
   if (isLoading || !result) {
     return (
       <div className="w-full max-w-md mx-auto animate-fade-in space-y-6 pb-6 pt-2">
@@ -80,10 +77,9 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
   };
 
   return (
-    // 3. Adicionado 'relative' aqui para posicionar o botão de share
     <div className="w-full max-w-md mx-auto animate-fade-in space-y-6 pb-20 text-brand-charcoal dark:text-dark-text relative">
       
-      {/* 4. Botão Flutuante de Compartilhar */}
+      {/* Botão Flutuante de Compartilhar */}
       <div className="absolute top-0 right-0 z-10">
         <button 
           onClick={() => setShowShareModal(true)}
@@ -94,7 +90,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
         </button>
       </div>
 
-      {/* 5. Renderização do Modal */}
+      {/* Renderização do Modal */}
       {showShareModal && (
         <ShareModal 
           score={result.score} 
@@ -129,7 +125,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
         </div>
       )}
 
-      {/* NOVO BLOCO: Transcrição Expansível */}
+      {/* Transcrição Expansível */}
       <div className="bg-white dark:bg-dark-surface rounded-3xl shadow-soft dark:shadow-none border border-slate-100 dark:border-white/5 transition-colors overflow-hidden">
         <button 
           onClick={() => setShowTranscript(!showTranscript)}
