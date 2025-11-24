@@ -1,13 +1,18 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { AnalysisResult, ContextType } from "../types";
 
-// 🔴 1. COLE SUA NOVA CHAVE AQUI:
-const apiKey = "AIzaSyBT4QKRI64magPXyNOK0VXl64RyaIXj_5A"; 
+// 🟢 VOLTAMOS PARA O MODO SEGURO:
+// A chave virá do arquivo .env (local) ou das Configurações da Vercel (online)
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
-const genAI = new GoogleGenerativeAI(apiKey);
+// Validação de segurança para te avisar no console se esquecer a chave
+if (!apiKey) {
+  console.error("ERRO CRÍTICO: Chave de API não encontrada. Configure VITE_GEMINI_API_KEY no .env ou na Vercel.");
+}
 
-// 🔴 2. MODELO ATUALIZADO (O 1.5 foi descontinuado):
-// Usamos 'gemini-2.5-flash' que é a versão padrão atual.
+const genAI = new GoogleGenerativeAI(apiKey || "");
+
+// 🟢 MODELO ESTÁVEL: Usando 1.5 Flash para garantir que funcione sem erro 404/503
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 const API_TIMEOUT_MS = 60000;
@@ -38,6 +43,10 @@ export const analyzeAudio = async (
   
   if (!navigator.onLine) {
     throw new AppError("Offline", "Verifique sua conexão.");
+  }
+
+  if (!apiKey) {
+    throw new AppError("Config Error", "Chave de API não configurada. Avise o administrador.");
   }
 
   try {
@@ -84,17 +93,13 @@ export const analyzeAudio = async (
   } catch (error: any) {
     console.error("Erro Gemini:", error);
     
-    // Tratamento de erros comuns
+    if (error.message?.includes("403")) {
+        throw new AppError("Auth Error", "Chave de API bloqueada ou vazada. Gere uma nova no Google AI Studio.");
+    }
     if (error.message?.includes("404")) {
-        throw new AppError("Model Error", "Erro 404: O modelo 1.5 foi descontinuado. Verifique se o código usa 'gemini-2.5-flash'.");
+        throw new AppError("Model Error", "Erro de modelo. Verifique a disponibilidade do Gemini 1.5 Flash.");
     }
-    if (error.message?.includes("503")) {
-        throw new AppError("Busy", "A IA está sobrecarregada (503). Tente novamente em 10 segundos.");
-    }
-    if (error.message?.includes("400")) {
-       throw new AppError("Auth Error", "Chave de API inválida ou expirada.");
-    }
-
+    
     throw new AppError("Erro na IA", "Não foi possível analisar o áudio.");
   }
 };
