@@ -2,31 +2,24 @@ import { Language } from "../types";
 
 export const TRANSLATIONS = {
   pt: {
+    // ... (mantenha tudo o que já existia antes) ...
     app_name: "SpeakUp",
     tab_practice: "Praticar",
     tab_history: "Histórico",
     tab_profile: "Perfil",
-    
-    // Home & Contexts
     home_title: "Vamos praticar?",
     home_subtitle: "Escolha um cenário ou tente a sorte.",
     context_placeholder: "Qual é o cenário? (Ex: Pedido de Casamento)",
     btn_random: "Gerar Desafio Surpresa",
-    
-    // Context Values (CORRIGIDO AQUI)
     ctx_interview: "Simulação de Entrevista",
     ctx_sales: "Pitch de Vendas",
     ctx_presentation: "Apresentação Formal",
-    ctx_difficult_conversation: "Conversa Difícil", // Corrigido de ctx_difficult
+    ctx_difficult_conversation: "Conversa Difícil",
     ctx_custom: "Cenário Personalizado",
-
-    // Recorder
     rec_recording: "Gravando...",
     rec_stop: "Parar e Analisar",
     rec_tap: "Toque para gravar",
     rec_permission: "Permissão de microfone necessária.",
-    
-    // Results & Details
     res_score: "Pontos",
     res_note: "Nota Final",
     res_transcript: "Ver Transcrição Completa",
@@ -44,8 +37,6 @@ export const TRANSLATIONS = {
     res_audio_unavailable: "Áudio não disponível",
     btn_retry: "Praticar Novamente",
     det_title: "Análise Detalhada",
-
-    // History
     hist_empty_title: "Sem histórico",
     hist_empty_desc: "Seus treinos aparecerão aqui.",
     hist_title: "Histórico de Treinos",
@@ -54,16 +45,12 @@ export const TRANSLATIONS = {
     hist_btn_cancel: "Cancelar",
     hist_btn_compare_now: "Comparar Agora",
     hist_delete_confirm: "Tem certeza que deseja excluir este treino?",
-
-    // Chart Labels
     chart_avg_score: "Média da Nota",
     chart_avg_ppm: "Média de PPM",
     chart_avg_vices: "Média de Vícios",
     chart_tab_score: "Nota",
     chart_tab_ppm: "PPM",
     chart_tab_vices: "Vícios",
-
-    // Compare
     comp_title: "Comparativo",
     comp_before: "Antes",
     comp_after: "Depois",
@@ -71,8 +58,6 @@ export const TRANSLATIONS = {
     comp_improved: "Parabéns! Você evoluiu {diff} pontos. Sua oratória está mais polida.",
     comp_declined: "Houve uma queda de {diff} pontos. Atenção aos vícios e ao ritmo.",
     comp_consistent: "Você manteve a consistência. Tente variar a entonação no próximo!",
-
-    // Profile
     prof_level: "Seu Nível",
     prof_next: "Próximo",
     prof_streak: "Dias Seguidos",
@@ -85,8 +70,6 @@ export const TRANSLATIONS = {
     btn_export: "Salvar Dados",
     btn_import: "Restaurar",
     alert_restore: "Atenção: Isso substituirá seu histórico atual. Continuar?",
-    
-    // Personas
     p_motivator_name: "Motivador",
     p_motivator_desc: "Foca no positivo e encoraja.",
     p_strict_name: "Rigoroso",
@@ -95,8 +78,6 @@ export const TRANSLATIONS = {
     p_funny_desc: "Aprenda rindo com sarcasmo.",
     p_technical_name: "Técnico",
     p_technical_desc: "Análise fria e baseada em dados.",
-
-    // System
     sys_error: "Algo deu errado",
     sys_success: "Parabéns!",
     load_sending: "Enviando áudio...",
@@ -104,37 +85,43 @@ export const TRANSLATIONS = {
     load_analyzing: "Analisando ritmo...",
     load_checking: "Caçando vícios...",
     load_generating: "Gerando feedback...",
-    
-    // Install & Share
     inst_title: "Instalar SpeakUp",
     inst_desc: "Acesso rápido e tela cheia",
     inst_btn: "Instalar Aplicativo",
     share_title: "Meu resultado no SpeakUp",
     share_btn: "Compartilhar Resultado",
-    share_download: "Baixar Imagem"
+    share_download: "Baixar Imagem",
+
+    // [NOVOS] Textos para TTS e Onboarding
+    tts_speak_feedback: "Ouvir Feedback",
+    onb_welcome_title: "Bem-vindo ao SpeakUp! 👋",
+    onb_welcome_desc: "Seu coach de oratória com Inteligência Artificial. Melhore a sua comunicação em segundos.",
+    onb_rec_title: "Grave e Analise 🎙️",
+    onb_rec_desc: "Escolha um cenário, grave o seu discurso e receba feedback instantâneo sobre ritmo, vícios e tom.",
+    onb_persona_title: "Escolha seu Coach 🎭",
+    onb_persona_desc: "Prefere um mentor motivador ou um crítico rigoroso? Personalize a IA no seu perfil.",
+    onb_btn_next: "Próximo",
+    onb_btn_start: "Começar Agora"
   },
   en: {
+    // ... (mantenha o existente) ...
     app_name: "SpeakUp",
     tab_practice: "Practice",
     tab_history: "History",
     tab_profile: "Profile",
-    
     home_title: "Ready to speak?",
     home_subtitle: "Choose a scenario or roll the dice.",
     context_placeholder: "What's the scenario? (e.g., Job Interview)",
     btn_random: "Surprise Challenge",
-    
     ctx_interview: "Job Interview",
     ctx_sales: "Sales Pitch",
     ctx_presentation: "Formal Presentation",
-    ctx_difficult_conversation: "Difficult Conversation", // Corrigido
+    ctx_difficult_conversation: "Difficult Conversation",
     ctx_custom: "Custom Scenario",
-
     rec_recording: "Recording...",
     rec_stop: "Stop & Analyze",
     rec_tap: "Tap to record",
     rec_permission: "Microphone permission required.",
-    
     res_score: "Score",
     res_note: "Final Score",
     res_transcript: "Full Transcript",
@@ -152,7 +139,6 @@ export const TRANSLATIONS = {
     res_audio_unavailable: "Audio unavailable",
     btn_retry: "Practice Again",
     det_title: "Detailed Analysis",
-
     hist_empty_title: "No history",
     hist_empty_desc: "Your trainings will appear here.",
     hist_title: "Training History",
@@ -161,14 +147,12 @@ export const TRANSLATIONS = {
     hist_btn_cancel: "Cancel",
     hist_btn_compare_now: "Compare Now",
     hist_delete_confirm: "Are you sure you want to delete this training?",
-
     chart_avg_score: "Avg Score",
     chart_avg_ppm: "Avg WPM",
     chart_avg_vices: "Avg Fillers",
     chart_tab_score: "Score",
     chart_tab_ppm: "WPM",
     chart_tab_vices: "Fillers",
-
     comp_title: "Comparison",
     comp_before: "Before",
     comp_after: "After",
@@ -176,7 +160,6 @@ export const TRANSLATIONS = {
     comp_improved: "Congrats! You improved {diff} points. Your speech is more polished.",
     comp_declined: "Score dropped by {diff} points. Watch out for fillers and rhythm.",
     comp_consistent: "You maintained consistency. Try varying intonation next time!",
-
     prof_level: "Your Level",
     prof_next: "Next",
     prof_streak: "Day Streak",
@@ -189,7 +172,6 @@ export const TRANSLATIONS = {
     btn_export: "Save Data",
     btn_import: "Restore",
     alert_restore: "Warning: This will replace your current history. Continue?",
-    
     p_motivator_name: "Motivator",
     p_motivator_desc: "Focuses on the positive and encourages.",
     p_strict_name: "Strict",
@@ -198,7 +180,6 @@ export const TRANSLATIONS = {
     p_funny_desc: "Learn while laughing with sarcasm.",
     p_technical_name: "Technical",
     p_technical_desc: "Cold, data-driven analysis.",
-
     sys_error: "Something went wrong",
     sys_success: "Great job!",
     load_sending: "Sending audio...",
@@ -206,36 +187,42 @@ export const TRANSLATIONS = {
     load_analyzing: "Analyzing rhythm...",
     load_checking: "Checking fillers...",
     load_generating: "Generating feedback...",
-
     inst_title: "Install SpeakUp",
     inst_desc: "Quick access & full screen",
     inst_btn: "Install App",
     share_title: "My SpeakUp Result",
     share_btn: "Share Result",
-    share_download: "Download Image"
+    share_download: "Download Image",
+
+    tts_speak_feedback: "Hear Feedback",
+    onb_welcome_title: "Welcome to SpeakUp! 👋",
+    onb_welcome_desc: "Your AI-powered speech coach. Improve your communication in seconds.",
+    onb_rec_title: "Record & Analyze 🎙️",
+    onb_rec_desc: "Choose a scenario, record your speech and get instant feedback on rhythm, fillers, and tone.",
+    onb_persona_title: "Choose your Coach 🎭",
+    onb_persona_desc: "Do you prefer a motivator or a strict critic? Customize your AI in the profile.",
+    onb_btn_next: "Next",
+    onb_btn_start: "Get Started"
   },
   es: {
+    // ... (mantenha o existente) ...
     app_name: "SpeakUp",
     tab_practice: "Practicar",
     tab_history: "Historial",
     tab_profile: "Perfil",
-    
     home_title: "¿A practicar?",
     home_subtitle: "Elige un escenario o prueba suerte.",
     context_placeholder: "¿Cuál es el escenario? (Ej: Entrevista)",
     btn_random: "Desafío Sorpresa",
-    
     ctx_interview: "Entrevista de Trabajo",
     ctx_sales: "Ventas",
     ctx_presentation: "Presentación Formal",
-    ctx_difficult_conversation: "Conversación Difícil", // Corrigido
+    ctx_difficult_conversation: "Conversación Difícil",
     ctx_custom: "Escenario Personalizado",
-
     rec_recording: "Grabando...",
     rec_stop: "Parar y Analizar",
     rec_tap: "Toca para grabar",
     rec_permission: "Se requiere permiso de micrófono.",
-    
     res_score: "Puntos",
     res_note: "Nota Final",
     res_transcript: "Ver Transcripción",
@@ -253,7 +240,6 @@ export const TRANSLATIONS = {
     res_audio_unavailable: "Audio no disponible",
     btn_retry: "Practicar de Nuevo",
     det_title: "Análisis Detallado",
-
     hist_empty_title: "Sin historial",
     hist_empty_desc: "Tus entrenamientos aparecerán aquí.",
     hist_title: "Historial",
@@ -262,14 +248,12 @@ export const TRANSLATIONS = {
     hist_btn_cancel: "Cancelar",
     hist_btn_compare_now: "Comparar Ahora",
     hist_delete_confirm: "¿Seguro que quieres eliminar este entrenamiento?",
-
     chart_avg_score: "Nota Media",
     chart_avg_ppm: "PPM Medio",
     chart_avg_vices: "Muletillas (Media)",
     chart_tab_score: "Nota",
     chart_tab_ppm: "PPM",
     chart_tab_vices: "Muletillas",
-
     comp_title: "Comparación",
     comp_before: "Antes",
     comp_after: "Después",
@@ -277,7 +261,6 @@ export const TRANSLATIONS = {
     comp_improved: "¡Felicidades! Mejoraste {diff} puntos. Tu oratoria es más pulida.",
     comp_declined: "Hubo una caída de {diff} puntos. Cuidado con las muletillas.",
     comp_consistent: "Mantuviste la consistencia. ¡Intenta variar la entonación!",
-
     prof_level: "Tu Nivel",
     prof_next: "Siguiente",
     prof_streak: "Racha",
@@ -290,7 +273,6 @@ export const TRANSLATIONS = {
     btn_export: "Guardar Datos",
     btn_import: "Restaurar",
     alert_restore: "Atención: Esto reemplazará tu historial actual. ¿Continuar?",
-    
     p_motivator_name: "Motivador",
     p_motivator_desc: "Enfocado en lo positivo y alentador.",
     p_strict_name: "Estricto",
@@ -299,7 +281,6 @@ export const TRANSLATIONS = {
     p_funny_desc: "Aprende riendo con sarcasmo.",
     p_technical_name: "Técnico",
     p_technical_desc: "Análisis frío basado en datos.",
-
     sys_error: "Algo salió mal",
     sys_success: "¡Felicidades!",
     load_sending: "Enviando audio...",
@@ -307,13 +288,22 @@ export const TRANSLATIONS = {
     load_analyzing: "Analizando ritmo...",
     load_checking: "Buscando muletillas...",
     load_generating: "Generando feedback...",
-
     inst_title: "Instalar SpeakUp",
     inst_desc: "Acceso rápido y pantalla completa",
     inst_btn: "Instalar Aplicación",
     share_title: "Mi resultado en SpeakUp",
     share_btn: "Compartir Resultado",
-    share_download: "Descargar Imagen"
+    share_download: "Descargar Imagen",
+
+    tts_speak_feedback: "Escuchar Feedback",
+    onb_welcome_title: "¡Bienvenido a SpeakUp! 👋",
+    onb_welcome_desc: "Tu coach de oratoria con IA. Mejora tu comunicación en segundos.",
+    onb_rec_title: "Graba y Analiza 🎙️",
+    onb_rec_desc: "Elige un escenario, graba tu discurso y recibe feedback instantáneo.",
+    onb_persona_title: "Elige tu Coach 🎭",
+    onb_persona_desc: "¿Prefieres un motivador o un crítico estricto? Personaliza tu IA en el perfil.",
+    onb_btn_next: "Siguiente",
+    onb_btn_start: "Comenzar"
   }
 };
 

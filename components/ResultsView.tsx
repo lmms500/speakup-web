@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { AnalysisResult } from '../types';
+import { AnalysisResult, CoachPersona } from '../types'; // Importei CoachPersona
 import { AudioPlayer } from './AudioPlayer';
 import { TranscriptionViewer } from './TranscriptionViewer';
 import { ShareModal } from './ShareModal';
-import { RotateCcw, CheckCircle2, AlertCircle, Sparkles, MicOff, Quote, ChevronDown, ChevronUp, Share2, Smile, Frown, Meh, Zap } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext'; // Importar
+import { RotateCcw, CheckCircle2, AlertCircle, Sparkles, MicOff, Quote, ChevronDown, ChevronUp, Share2, Smile, Frown, Meh, Zap, Volume2 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
+import { storageService } from '../services/storageService'; // Importei storageService
 
 interface ResultsViewProps {
   result: AnalysisResult | null;
@@ -13,11 +14,20 @@ interface ResultsViewProps {
   onRetry: () => void;
 }
 
+// Configuração de "Emoção" da Voz (Simulação)
+const VOICE_SETTINGS: Record<CoachPersona, { rate: number; pitch: number }> = {
+  MOTIVATOR: { rate: 1.1, pitch: 1.2 }, // Entusiasta (Rápido + Agudo)
+  STRICT: { rate: 0.9, pitch: 0.8 },    // Sério (Lento + Grave)
+  FUNNY: { rate: 1.2, pitch: 1.4 },     // Cômico (Muito Rápido + Muito Agudo)
+  TECHNICAL: { rate: 1.0, pitch: 1.0 }  // Neutro (Padrão)
+};
+
 export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = false, audioBlob, onRetry }) => {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [showTranscript, setShowTranscript] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
-  const { t } = useLanguage(); // Hook
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const { t, language } = useLanguage();
 
   useEffect(() => {
     if (audioBlob) {
@@ -27,15 +37,57 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
     }
   }, [audioBlob]);
 
+  // Função de Text-to-Speech com "Personalidade"
+  const handleSpeakFeedback = () => {
+    if (!result) return;
+
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+
+    // 1. Pega a persona atual do usuário
+    const profile = storageService.getUserProfile();
+    const persona = profile.persona || 'MOTIVATOR';
+    const settings = VOICE_SETTINGS[persona];
+
+    // 2. Prepara o texto
+    const textToSpeak = `${result.feedback_positivo}. ${result.ponto_melhoria}`;
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    
+    // 3. Configura idioma
+    utterance.lang = language === 'pt' ? 'pt-BR' : language === 'es' ? 'es-ES' : 'en-US';
+    
+    // 4. Aplica a "emoção" (velocidade e tom)
+    utterance.rate = settings.rate;
+    utterance.pitch = settings.pitch;
+
+    // Tenta selecionar uma voz compatível (opcional, melhora se disponível)
+    const voices = window.speechSynthesis.getVoices();
+    // Tenta achar uma voz do Google ou Microsoft que soe mais natural para o idioma
+    const preferredVoice = voices.find(v => 
+      v.lang.startsWith(utterance.lang) && (v.name.includes("Google") || v.name.includes("Natural"))
+    );
+    if (preferredVoice) utterance.voice = preferredVoice;
+
+    utterance.onend = () => setIsSpeaking(false);
+    
+    window.speechSynthesis.speak(utterance);
+    setIsSpeaking(true);
+  };
+
+  // Cleanup para parar a fala se sair da tela
+  useEffect(() => {
+    return () => window.speechSynthesis.cancel();
+  }, []);
+
   const getSentimentIcon = (sentiment?: string) => {
-    // Mapeamento simples para ícones, independente do idioma da string
-    // A string do sentimento já vem traduzida da IA
     if (!sentiment) return <Meh size={24} className="text-slate-400" />;
     return <Smile size={24} className="text-brand-mint" />; 
   };
 
   if (isLoading || !result) {
-    // ... (Loading skeleton mantido igual) ...
     return (
       <div className="w-full max-w-md mx-auto animate-fade-in space-y-6 pb-6 pt-2">
         <div className="text-center space-y-2 mb-8">
@@ -104,6 +156,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
         />
       )}
       
+      {/* Gráfico de Pontuação */}
       <div className="text-center mt-2 relative">
         <div className="relative inline-flex justify-center items-center">
           <svg className="w-48 h-48 transform -rotate-90">
@@ -120,6 +173,21 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
             <span className="text-xs font-bold uppercase text-slate-400 tracking-widest mt-1">{t('res_score')}</span>
           </div>
         </div>
+      </div>
+
+      {/* Botão TTS */}
+      <div className="flex justify-center -mt-2">
+        <button 
+          onClick={handleSpeakFeedback}
+          className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all ${
+            isSpeaking 
+              ? 'bg-brand-purple text-white animate-pulse' 
+              : 'bg-slate-100 dark:bg-white/10 text-brand-purple dark:text-brand-primary hover:bg-slate-200 dark:hover:bg-white/20'
+          }`}
+        >
+          <Volume2 size={16} />
+          {isSpeaking ? 'Falando...' : t('tts_speak_feedback')}
+        </button>
       </div>
 
       {audioUrl && (
@@ -144,11 +212,12 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
         
         {showTranscript && (
           <div className="px-6 pb-6 animate-fade-in border-t border-slate-100 dark:border-white/5">
-             <TranscriptionViewer text={result.transcript} />
+             <TranscriptionViewer text={result.transcript || "Transcrição indisponível."} />
           </div>
         )}
       </div>
 
+      {/* Grid de Métricas */}
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-white dark:bg-white/5 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-white/5 flex flex-col items-center justify-center text-center">
           <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">{t('res_metrics_vices')}</div>
