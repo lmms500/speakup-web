@@ -2,23 +2,25 @@ export enum ContextType {
   INTERVIEW = 'Simulação de Entrevista',
   SALES = 'Pitch de Vendas',
   PRESENTATION = 'Apresentação Formal',
-  DIFFICULT_CONVERSATION = 'Conversa Difícil'
+  DIFFICULT_CONVERSATION = 'Conversa Difícil',
+  CUSTOM = 'Cenário Personalizado'
 }
+
+// [NOVO] Tipos de personalidade
+export type CoachPersona = 'MOTIVATOR' | 'STRICT' | 'FUNNY' | 'TECHNICAL';
 
 export interface AnalysisResult {
   id: string;
   audioId?: string;
   timestamp: number;
-  context: ContextType;
+  context: ContextType | string;
   speech_detected: boolean;
   transcript: string;
   score: number;
   vicios_linguagem_count: number;
   ritmo_analise: 'Muito Rápido' | 'Lento' | 'Ideal';
-  
-  // Novo Campo de Sentimento
+  wpm?: number;
   sentiment?: 'Confiança' | 'Nervosismo' | 'Neutro' | 'Entusiasmo';
-  
   feedback_positivo: string;
   ponto_melhoria: string;
   frase_reformulada: string;
@@ -29,20 +31,21 @@ export interface UserProfile {
   totalXp: number;
   level: number;
   streak: number;
-  lastTrainingDate: string | null; // ISO String
-  badges: string[]; // IDs das medalhas conquistadas
+  lastTrainingDate: string | null;
+  badges: string[];
+  persona: CoachPersona; // [NOVO] Campo de persona
 }
 
 export interface Badge {
   id: string;
   name: string;
   description: string;
-  icon: string; // Emoji ou ícone
+  icon: string;
   condition: (profile: UserProfile, history: AnalysisResult[]) => boolean;
 }
 
 export type AppState = 'IDLE' | 'RECORDING' | 'ANALYZING' | 'RESULTS';
-export type TabState = 'PRACTICE' | 'HISTORY' | 'DETAILS' | 'PROFILE'; // Nova aba Profile
+export type TabState = 'PRACTICE' | 'HISTORY' | 'DETAILS' | 'PROFILE';
 
 export interface NavigationState {
   view: TabState;

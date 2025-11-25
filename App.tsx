@@ -10,22 +10,33 @@ import { AudioRecorder } from './components/AudioRecorder';
 import { useTheme } from './context/ThemeContext';
 import { InstallPrompt } from './components/InstallPrompt'; 
 import { ProfileView } from './components/ProfileView'; 
-// Adicionei o ícone Trophy e CheckCircle para as conquistas
-import { ChevronDown, Moon, Sun, LayoutGrid, History, Mic, XCircle, Flame, User, Trophy, CheckCircle } from 'lucide-react';
+import { ChevronDown, Moon, Sun, LayoutGrid, History, Mic, XCircle, Flame, User, Trophy, Dices } from 'lucide-react';
 
-// Novo tipo para gerir o estado da notificação
 interface NotificationState {
   message: string;
   type: 'error' | 'success';
 }
 
+// Lista de tópicos para o modo aleatório
+const RANDOM_TOPICS = [
+  "Venda uma caneta sem tinta para mim.",
+  "Explique o que é a Internet para um viajante do tempo de 1800.",
+  "Convença seu chefe a te dar um aumento agora.",
+  "Faça um discurso de padrinho de casamento de última hora.",
+  "Peça desculpas por ter esquecido o aniversário de namoro.",
+  "Debata por que pizza com abacaxi é a melhor invenção.",
+  "Ensine alguém a amarrar o sapato apenas usando palavras.",
+  "Justifique por que você chegou 2 horas atrasado no trabalho.",
+  "Convença uma criança a comer brócolis.",
+  "Faça um pitch de 30 segundos sobre você mesmo."
+];
+
 function App() {
   const [navState, setNavState] = useState<NavigationState>({ view: 'PRACTICE' });
   const [appState, setAppState] = useState<AppState>('IDLE');
   const [selectedContext, setSelectedContext] = useState<ContextType>(ContextType.INTERVIEW);
+  const [customContext, setCustomContext] = useState("");
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
-  
-  // Estado unificado de notificação (substitui errorMessage)
   const [notification, setNotification] = useState<NotificationState | null>(null);
   
   const [streak, setStreak] = useState(0);
@@ -35,23 +46,38 @@ function App() {
     setStreak(storageService.getStreak());
   }, [appState]);
 
-  // Função genérica melhorada para mostrar notificações
   const showNotification = (message: string, type: 'error' | 'success' = 'error') => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 5000);
   };
 
-  const handleRecordingStop = async (audioBlob: Blob) => {
+  const handleRandomTopic = () => {
+    const randomIndex = Math.floor(Math.random() * RANDOM_TOPICS.length);
+    const topic = RANDOM_TOPICS[randomIndex];
+    
+    setSelectedContext(ContextType.CUSTOM);
+    setCustomContext(topic);
+    
+    // Efeito visual de feedback (opcional)
+    // showNotification("Tópico gerado! Boa sorte.", 'success'); 
+  };
+
+  const handleRecordingStop = async (audioBlob: Blob, duration: number) => {
     setAppState('ANALYZING');
     
+    const finalContext = selectedContext === ContextType.CUSTOM 
+      ? (customContext.trim() || "Fala Livre") 
+      : selectedContext;
+
+    const currentProfile = storageService.getUserProfile();
+    const currentPersona = currentProfile.persona;
+
     try {
-      const result = await analyzeAudio(audioBlob, selectedContext);
+      const result = await analyzeAudio(audioBlob, finalContext, duration, currentPersona);
       
       if (result.speech_detected) {
-        // O storageService retorna as novas medalhas ganhas neste treino
         const { newBadges } = await storageService.saveResult(result, audioBlob);
         
-        // 🎉 Lógica de Sucesso: Se ganhou medalha, mostra o Toast Bonito
         if (newBadges.length > 0) {
            const names = newBadges.map(b => b.name).join(', ');
            showNotification(`Nova Conquista Desbloqueada: ${names}!`, 'success');
@@ -63,7 +89,7 @@ function App() {
     } catch (error: any) {
       console.error(error);
       const errorMsg = error.userMessage || "Erro ao analisar áudio. Tente novamente.";
-      showNotification(errorMsg, 'error'); // Mostra como erro (vermelho)
+      showNotification(errorMsg, 'error');
       setAppState('IDLE');
     }
   };
@@ -87,7 +113,6 @@ function App() {
       if (detailItem) return <HistoryDetailView result={detailItem} onBack={handleBackFromDetail} />;
     }
     
-    // Renderiza a nova tela de Perfil
     if (navState.view === 'PROFILE') return <ProfileView />;
 
     if (navState.view === 'HISTORY') return <HistoryView onSelectDetail={handleSelectDetail} />;
@@ -100,29 +125,57 @@ function App() {
              {appState === 'IDLE' && (
                 <div className="text-center space-y-2 mt-4 mb-4">
                   <h2 className="text-3xl font-heading font-bold text-brand-charcoal dark:text-dark-text transition-colors">Vamos praticar?</h2>
-                  <p className="text-slate-500 dark:text-slate-400 font-medium text-lg transition-colors">Escolha o cenário.</p>
+                  <p className="text-slate-500 dark:text-slate-400 font-medium text-lg transition-colors">Escolha um cenário ou tente a sorte.</p>
                 </div>
              )}
             {appState === 'IDLE' && (
-              <div className="w-full space-y-2 bg-white dark:bg-dark-surface p-1 rounded-2xl shadow-soft dark:shadow-dark-soft transition-all mb-4">
-                <div className="relative group">
-                  <select 
-                    value={selectedContext}
-                    onChange={(e) => setSelectedContext(e.target.value as ContextType)}
-                    className="w-full p-5 bg-transparent border-0 rounded-xl appearance-none outline-none text-brand-charcoal dark:text-dark-text font-semibold text-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 transition-colors z-10 relative"
-                  >
-                    {Object.values(ContextType).map((ctx) => (
-                      <option key={ctx} value={ctx} className="text-brand-charcoal bg-white">{ctx}</option>
-                    ))}
-                  </select>
-                  <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-brand-purple dark:text-dark-primary">
-                    <ChevronDown size={24} />
+              <div className="w-full space-y-4">
+                <div className="bg-white dark:bg-dark-surface p-1 rounded-2xl shadow-soft dark:shadow-dark-soft transition-all">
+                  <div className="relative group">
+                    <select 
+                      value={selectedContext}
+                      onChange={(e) => setSelectedContext(e.target.value as ContextType)}
+                      className="w-full p-5 bg-transparent border-0 rounded-xl appearance-none outline-none text-brand-charcoal dark:text-dark-text font-semibold text-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 transition-colors z-10 relative"
+                    >
+                      {Object.values(ContextType).map((ctx) => (
+                        <option key={ctx} value={ctx} className="text-brand-charcoal bg-white">{ctx}</option>
+                      ))}
+                    </select>
+                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-brand-purple dark:text-dark-primary">
+                      <ChevronDown size={24} />
+                    </div>
                   </div>
+
+                  {/* Input condicional para Contexto Personalizado */}
+                  {selectedContext === ContextType.CUSTOM && (
+                    <div className="px-1 pb-1 animate-fade-in">
+                      <textarea
+                        placeholder="Qual é o cenário? (Ex: Pedido de Casamento)"
+                        value={customContext}
+                        onChange={(e) => setCustomContext(e.target.value)}
+                        className="w-full p-4 bg-slate-50 dark:bg-white/5 border-2 border-transparent focus:border-brand-purple/50 rounded-xl outline-none text-brand-charcoal dark:text-white font-medium transition-all resize-none h-24"
+                        autoFocus
+                      />
+                    </div>
+                  )}
                 </div>
+
+                {/* Botão de Desafio Aleatório */}
+                <button 
+                  onClick={handleRandomTopic}
+                  className="w-full py-3 px-4 rounded-xl border-2 border-dashed border-brand-purple/30 hover:border-brand-purple hover:bg-brand-purple/5 dark:hover:bg-brand-purple/10 text-brand-purple dark:text-dark-primary font-bold flex items-center justify-center gap-2 transition-all group active:scale-95"
+                >
+                  <Dices size={20} className="group-hover:rotate-180 transition-transform duration-500" />
+                  Gerar Desafio Surpresa
+                </button>
               </div>
             )}
             <div className="flex-1 flex items-center w-full">
-               <AudioRecorder context={selectedContext} onStop={handleRecordingStop} onRecordingStart={() => setAppState('RECORDING')}/>
+               <AudioRecorder 
+                 context={selectedContext === ContextType.CUSTOM ? (customContext || "Personalizado") : selectedContext} 
+                 onStop={handleRecordingStop} 
+                 onRecordingStart={() => setAppState('RECORDING')}
+                />
             </div>
           </div>
         );
@@ -136,7 +189,6 @@ function App() {
   return (
     <div className="fixed inset-0 flex flex-col items-center bg-brand-offwhite dark:bg-dark-bg text-brand-charcoal dark:text-dark-text overflow-hidden font-sans transition-colors duration-300 selection:bg-brand-purple selection:text-white">
       
-      {/* --- SISTEMA DE NOTIFICAÇÃO MELHORADO --- */}
       {notification && (
         <div className={`
           absolute top-4 left-4 right-4 p-4 rounded-2xl shadow-2xl z-50 animate-fade-in flex items-center gap-4 border
@@ -144,7 +196,6 @@ function App() {
             ? 'bg-brand-coral text-white border-red-400' 
             : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-white/20 shadow-glow-purple'}
         `}>
-          {/* Ícone Dinâmico */}
           <div className={`
             p-2 rounded-full shrink-0
             ${notification.type === 'error' ? 'bg-white/20' : 'bg-white/20 backdrop-blur-md'}

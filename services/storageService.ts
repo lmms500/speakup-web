@@ -1,4 +1,4 @@
-import { AnalysisResult, UserProfile, Badge } from "../types";
+import { AnalysisResult, UserProfile, Badge, CoachPersona } from "../types";
 import { audioStorage } from "./audioStorage";
 
 const STORAGE_KEY = 'speakup_history_v1';
@@ -48,12 +48,19 @@ export const storageService = {
       level: 1,
       streak: 0,
       lastTrainingDate: null,
-      badges: []
+      badges: [],
+      persona: 'MOTIVATOR'
     };
   },
 
   _saveProfile: (profile: UserProfile) => {
     localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+  },
+
+  updatePersona: (persona: CoachPersona) => {
+    const profile = storageService._getProfile();
+    profile.persona = persona;
+    storageService._saveProfile(profile);
   },
 
   // --- Core ---
@@ -89,11 +96,11 @@ export const storageService = {
         profile.lastTrainingDate = new Date().toISOString();
       }
 
-      // Cálculo de XP (Base: 100 + Score)
+      // Cálculo de XP
       const xpGained = 100 + result.score;
       profile.totalXp += xpGained;
       
-      // Cálculo de Nível (Ex: Nível = raiz quadrada do XP / 10)
+      // Cálculo de Nível
       const newLevel = Math.floor(Math.sqrt(profile.totalXp) / 5) + 1;
       profile.level = newLevel;
 
@@ -131,6 +138,53 @@ export const storageService = {
   getById: (id: string): AnalysisResult | undefined => {
     const history = storageService.getHistory();
     return history.find(item => item.id === id);
+  },
+
+  deleteById: async (id: string): Promise<void> => {
+    try {
+      await audioStorage.deleteAudio(id);
+      const currentHistory = storageService.getHistory();
+      const newHistory = currentHistory.filter(item => item.id !== id);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newHistory));
+    } catch (error) {
+      console.error("Erro ao excluir:", error);
+    }
+  },
+
+  // [NOVO] Métodos de Backup
+  createBackup: (): string => {
+    const profile = storageService._getProfile();
+    const history = storageService.getHistory();
+    
+    const backupData = {
+      version: 1,
+      timestamp: Date.now(),
+      appName: 'SpeakUp',
+      profile,
+      history
+    };
+    
+    return JSON.stringify(backupData, null, 2);
+  },
+
+  restoreBackup: async (jsonString: string): Promise<boolean> => {
+    try {
+      const data = JSON.parse(jsonString);
+      
+      // Validação básica
+      if (!data.profile || !data.history || data.appName !== 'SpeakUp') {
+        throw new Error("Arquivo de backup inválido ou incompatível.");
+      }
+
+      // Restaura dados
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(data.profile));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data.history));
+      
+      return true;
+    } catch (error) {
+      console.error("Erro ao restaurar:", error);
+      return false;
+    }
   },
 
   getUserProfile: (): UserProfile => {

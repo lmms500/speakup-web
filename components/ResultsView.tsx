@@ -25,7 +25,6 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
     }
   }, [audioBlob]);
 
-  // Helper para ícone de sentimento
   const getSentimentIcon = (sentiment?: string) => {
     switch(sentiment) {
       case 'Confiança': return <Zap size={24} className="text-yellow-500" />;
@@ -149,7 +148,8 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
         )}
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      {/* Grid de Métricas */}
+      <div className="grid grid-cols-2 gap-3">
         <div className="bg-white dark:bg-white/5 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-white/5 flex flex-col items-center justify-center text-center">
           <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Vícios</div>
           <span className={`text-xl font-bold ${result.vicios_linguagem_count > 0 ? 'text-brand-coral' : 'text-brand-mint'}`}>
@@ -158,11 +158,18 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
         </div>
         
         <div className="bg-white dark:bg-white/5 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-white/5 flex flex-col items-center justify-center text-center">
+            <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Velocidade</div>
+            <div className="flex flex-col items-center">
+                <span className="text-xl font-bold dark:text-white leading-none">{result.wpm || '-'}</span>
+                <span className="text-[10px] text-slate-400 font-medium" title="Palavras por minuto">pal/min</span>
+            </div>
+        </div>
+
+        <div className="bg-white dark:bg-white/5 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-white/5 flex flex-col items-center justify-center text-center">
           <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Ritmo</div>
           <span className="text-sm font-bold dark:text-white leading-tight">{result.ritmo_analise}</span>
         </div>
 
-        {/* Card de Sentimento */}
         <div className="bg-white dark:bg-white/5 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-white/5 flex flex-col items-center justify-center text-center">
           <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Tom</div>
           <div className="flex flex-col items-center">

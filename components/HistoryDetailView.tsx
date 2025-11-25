@@ -81,15 +81,21 @@ export const HistoryDetailView: React.FC<HistoryDetailViewProps> = ({ result, on
           </div>
         )}
 
-        {/* Details Grid */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-white dark:bg-dark-surface p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-white/5">
-             <div className="text-xs font-bold text-slate-400 uppercase mb-1">Ritmo</div>
-             <div className="text-lg font-bold text-brand-charcoal dark:text-dark-text">{result.ritmo_analise}</div>
+        {/* Details Grid - Atualizado para 3 colunas */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-white dark:bg-dark-surface p-3 rounded-2xl border border-slate-100 dark:border-white/5 text-center">
+             <div className="text-[10px] font-bold text-slate-400 uppercase mb-1">Ritmo</div>
+             <div className="text-sm font-bold text-brand-charcoal dark:text-dark-text">{result.ritmo_analise}</div>
           </div>
-          <div className="bg-white dark:bg-dark-surface p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-white/5">
-             <div className="text-xs font-bold text-slate-400 uppercase mb-1">Vícios</div>
-             <div className="text-lg font-bold text-brand-charcoal dark:text-dark-text">{result.vicios_linguagem_count} <span className="text-xs font-normal text-slate-400">detectados</span></div>
+          
+          <div className="bg-white dark:bg-dark-surface p-3 rounded-2xl border border-slate-100 dark:border-white/5 text-center">
+             <div className="text-[10px] font-bold text-slate-400 uppercase mb-1">Velocidade</div>
+             <div className="text-sm font-bold text-brand-charcoal dark:text-dark-text">{result.wpm || 0} <span className="text-[10px] font-normal" title="Palavras por minuto">pal/min</span></div>
+          </div>
+
+          <div className="bg-white dark:bg-dark-surface p-3 rounded-2xl border border-slate-100 dark:border-white/5 text-center">
+             <div className="text-[10px] font-bold text-slate-400 uppercase mb-1">Vícios</div>
+             <div className="text-sm font-bold text-brand-charcoal dark:text-dark-text">{result.vicios_linguagem_count}</div>
           </div>
         </div>
 

@@ -2,11 +2,10 @@ import React from 'react';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import { Button } from './Button';
 import { AudioVisualizer } from './AudioVisualizer';
-import { ContextType } from '../types';
 
 interface AudioRecorderProps {
-  context: ContextType;
-  onStop: (blob: Blob) => void;
+  context: string;
+  onStop: (blob: Blob, duration: number) => void;
   onRecordingStart?: () => void;
 }
 
@@ -32,7 +31,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
   const handleToggle = async () => {
     if (isRecording) {
       const blob = await stopRecording();
-      if (blob) onStop(blob);
+      if (blob) onStop(blob, recordingTime);
     } else {
       await startRecording();
       if (onRecordingStart) onRecordingStart();
