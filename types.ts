@@ -1,19 +1,19 @@
 export enum ContextType {
-  INTERVIEW = 'Simulação de Entrevista',
-  SALES = 'Pitch de Vendas',
-  PRESENTATION = 'Apresentação Formal',
-  DIFFICULT_CONVERSATION = 'Conversa Difícil',
-  CUSTOM = 'Cenário Personalizado'
+  INTERVIEW = 'INTERVIEW', // Mudado para chave simples
+  SALES = 'SALES',
+  PRESENTATION = 'PRESENTATION',
+  DIFFICULT_CONVERSATION = 'DIFFICULT_CONVERSATION',
+  CUSTOM = 'CUSTOM'
 }
 
-// [NOVO] Tipos de personalidade
 export type CoachPersona = 'MOTIVATOR' | 'STRICT' | 'FUNNY' | 'TECHNICAL';
+export type Language = 'pt' | 'en' | 'es';
 
 export interface AnalysisResult {
   id: string;
   audioId?: string;
   timestamp: number;
-  context: ContextType | string;
+  context: ContextType | string; // Pode ser Enum Key ou String Customizada
   speech_detected: boolean;
   transcript: string;
   score: number;
@@ -33,7 +33,8 @@ export interface UserProfile {
   streak: number;
   lastTrainingDate: string | null;
   badges: string[];
-  persona: CoachPersona; // [NOVO] Campo de persona
+  persona: CoachPersona;
+  language: Language;
 }
 
 export interface Badge {
@@ -45,9 +46,10 @@ export interface Badge {
 }
 
 export type AppState = 'IDLE' | 'RECORDING' | 'ANALYZING' | 'RESULTS';
-export type TabState = 'PRACTICE' | 'HISTORY' | 'DETAILS' | 'PROFILE';
+export type TabState = 'PRACTICE' | 'HISTORY' | 'DETAILS' | 'PROFILE' | 'COMPARE';
 
 export interface NavigationState {
   view: TabState;
   detailId?: string;
+  compareIds?: [string, string];
 }

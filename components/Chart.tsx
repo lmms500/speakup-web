@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { AnalysisResult } from '../types';
 import { Activity, Zap, AlertTriangle } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface ChartProps {
   data: AnalysisResult[];
@@ -10,8 +11,8 @@ type ChartMetric = 'score' | 'wpm' | 'vicios';
 
 export const Chart: React.FC<ChartProps> = ({ data }) => {
   const [activeMetric, setActiveMetric] = useState<ChartMetric>('score');
+  const { t } = useLanguage();
 
-  // Prepara os dados: últimos 10, ordem cronológica
   const chartData = useMemo(() => {
     return [...data].slice(0, 10).reverse();
   }, [data]);
@@ -19,12 +20,11 @@ export const Chart: React.FC<ChartProps> = ({ data }) => {
   if (chartData.length < 2) {
     return (
       <div className="w-full bg-white dark:bg-[#1E1E1E] rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-white/5 mb-6 text-center">
-        <p className="text-slate-400 text-sm">Complete mais um treino para ver sua evolução!</p>
+        <p className="text-slate-400 text-sm">{t('hist_empty_desc')}</p>
       </div>
     );
   }
 
-  // --- CÁLCULO DAS MÉDIAS ---
   const averages = useMemo(() => {
     const total = chartData.length;
     if (total === 0) return { score: 0, wpm: 0, vicios: 0 };
@@ -36,42 +36,44 @@ export const Chart: React.FC<ChartProps> = ({ data }) => {
     return {
       score: Math.round(sumScore / total),
       wpm: Math.round(sumWpm / total),
-      vicios: (sumVicios / total).toFixed(1) // Uma casa decimal para vícios (ex: 2.5)
+      vicios: (sumVicios / total).toFixed(1)
     };
   }, [chartData]);
 
-  // Configurações do Gráfico
   const width = 300;
   const height = 120;
   const padding = 10;
 
   const config = {
     score: {
-      label: 'Média da Nota', // Alterado label
-      color: '#6C63FF', // Roxo
+      label: t('chart_avg_score'),
+      tabLabel: t('chart_tab_score'),
+      color: '#6C63FF',
       icon: <Activity size={14} />,
       getValue: (d: AnalysisResult) => d.score,
-      currentAverage: averages.score, // Usa a média calculada
+      currentAverage: averages.score,
       format: (v: number | string) => v.toString(),
       min: 0,
       max: 100
     },
     wpm: {
-      label: 'Média de pal/min', // Alterado label
-      color: '#00C896', // Menta
+      label: t('chart_avg_ppm'),
+      tabLabel: t('chart_tab_ppm'),
+      color: '#00C896',
       icon: <Zap size={14} />,
       getValue: (d: AnalysisResult) => d.wpm || 0,
-      currentAverage: averages.wpm, // Usa a média calculada
-      format: (v: number | string) => `${v} pal/min`,
+      currentAverage: averages.wpm,
+      format: (v: number | string) => `${v} ppm`,
       min: 0,
       max: Math.max(...chartData.map(d => d.wpm || 0), 200) + 20 
     },
     vicios: {
-      label: 'Média de Vícios', // Alterado label
-      color: '#FF6584', // Coral
+      label: t('chart_avg_vices'),
+      tabLabel: t('chart_tab_vices'),
+      color: '#FF6584',
       icon: <AlertTriangle size={14} />,
       getValue: (d: AnalysisResult) => d.vicios_linguagem_count,
-      currentAverage: averages.vicios, // Usa a média calculada
+      currentAverage: averages.vicios,
       format: (v: number | string) => v.toString(),
       min: 0,
       max: Math.max(...chartData.map(d => d.vicios_linguagem_count), 5) + 2
@@ -80,7 +82,6 @@ export const Chart: React.FC<ChartProps> = ({ data }) => {
 
   const currentConfig = config[activeMetric];
 
-  // Cálculos de Coordenadas
   const getX = (index: number) => {
     return padding + (index / (chartData.length - 1)) * (width - 2 * padding);
   };
@@ -91,7 +92,6 @@ export const Chart: React.FC<ChartProps> = ({ data }) => {
     return height - padding - ((value - min) / (max - min)) * (height - 2 * padding);
   };
 
-  // Construção do Caminho SVG
   let pathD = "";
   chartData.forEach((point, i) => {
     const val = currentConfig.getValue(point);
@@ -104,7 +104,6 @@ export const Chart: React.FC<ChartProps> = ({ data }) => {
   return (
     <div className="w-full bg-white dark:bg-[#1E1E1E] rounded-3xl p-5 shadow-soft dark:shadow-dark-soft border border-slate-100 dark:border-white/5 mb-6 transition-colors">
       
-      {/* Header com Tabs */}
       <div className="flex p-1 bg-slate-100 dark:bg-white/5 rounded-xl mb-6 overflow-hidden">
         {(Object.keys(config) as ChartMetric[]).map((metric) => {
           const isActive = activeMetric === metric;
@@ -119,7 +118,7 @@ export const Chart: React.FC<ChartProps> = ({ data }) => {
               `}
             >
               {config[metric].icon}
-              <span className="hidden sm:inline">{metric === 'wpm' ? 'pal/min' : metric === 'score' ? 'Nota' : 'Vícios'}</span>
+              <span className="hidden sm:inline">{config[metric].tabLabel}</span>
             </button>
           );
         })}
@@ -127,14 +126,13 @@ export const Chart: React.FC<ChartProps> = ({ data }) => {
 
       <div className="flex justify-between items-end mb-2 px-2">
         <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-          {currentConfig.label} <span className="opacity-50 normal-case">(últimos {chartData.length})</span>
+          {currentConfig.label} <span className="opacity-50 normal-case">({chartData.length})</span>
         </h3>
         <div className="text-3xl font-heading font-bold text-brand-charcoal dark:text-white" style={{ color: currentConfig.color }}>
           {currentConfig.format(currentConfig.currentAverage)}
         </div>
       </div>
       
-      {/* Área do Gráfico */}
       <div className="relative w-full h-32 flex items-center justify-center">
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
           <defs>

@@ -4,6 +4,7 @@ import { AudioPlayer } from './AudioPlayer';
 import { TranscriptionViewer } from './TranscriptionViewer';
 import { ShareModal } from './ShareModal';
 import { RotateCcw, CheckCircle2, AlertCircle, Sparkles, MicOff, Quote, ChevronDown, ChevronUp, Share2, Smile, Frown, Meh, Zap } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext'; // Importar
 
 interface ResultsViewProps {
   result: AnalysisResult | null;
@@ -16,6 +17,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [showTranscript, setShowTranscript] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const { t } = useLanguage(); // Hook
 
   useEffect(() => {
     if (audioBlob) {
@@ -26,15 +28,14 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
   }, [audioBlob]);
 
   const getSentimentIcon = (sentiment?: string) => {
-    switch(sentiment) {
-      case 'Confiança': return <Zap size={24} className="text-yellow-500" />;
-      case 'Entusiasmo': return <Smile size={24} className="text-brand-mint" />;
-      case 'Nervosismo': return <Frown size={24} className="text-brand-coral" />;
-      default: return <Meh size={24} className="text-slate-400" />;
-    }
+    // Mapeamento simples para ícones, independente do idioma da string
+    // A string do sentimento já vem traduzida da IA
+    if (!sentiment) return <Meh size={24} className="text-slate-400" />;
+    return <Smile size={24} className="text-brand-mint" />; 
   };
 
   if (isLoading || !result) {
+    // ... (Loading skeleton mantido igual) ...
     return (
       <div className="w-full max-w-md mx-auto animate-fade-in space-y-6 pb-6 pt-2">
         <div className="text-center space-y-2 mb-8">
@@ -61,15 +62,15 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
              <MicOff size={40} />
           </div>
           <div>
-            <h2 className="text-2xl font-heading font-bold text-brand-charcoal dark:text-dark-text mb-2 transition-colors">Não ouvimos nada</h2>
+            <h2 className="text-2xl font-heading font-bold text-brand-charcoal dark:text-dark-text mb-2 transition-colors">{t('res_no_speech')}</h2>
             <p className="text-slate-500 dark:text-slate-400 font-medium px-4 transition-colors">
-              O áudio parece vazio ou muito baixo. Tente falar um pouco mais alto.
+              {t('res_no_speech_desc')}
             </p>
           </div>
         </div>
         <div className="pt-4">
           <button onClick={onRetry} className="w-full py-4 rounded-xl font-bold bg-brand-purple text-white shadow-glow-purple hover:bg-brand-purple/90 transition-all">
-            Tentar Novamente
+            {t('btn_retry')}
           </button>
         </div>
       </div>
@@ -89,7 +90,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
         <button 
           onClick={() => setShowShareModal(true)}
           className="p-2 bg-white dark:bg-white/10 rounded-full shadow-sm hover:scale-110 transition-transform text-brand-purple dark:text-white border border-slate-100 dark:border-white/10"
-          title="Compartilhar Resultado"
+          title={t('share_btn')}
         >
           <Share2 size={20} />
         </button>
@@ -116,7 +117,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-6xl font-heading font-bold tracking-tighter tabular-nums dark:text-white">{result.score}</span>
-            <span className="text-xs font-bold uppercase text-slate-400 tracking-widest mt-1">Pontos</span>
+            <span className="text-xs font-bold uppercase text-slate-400 tracking-widest mt-1">{t('res_score')}</span>
           </div>
         </div>
       </div>
@@ -135,7 +136,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
           <div className="flex items-center gap-3 text-brand-purple dark:text-dark-primary">
             <Quote size={20} className="fill-current opacity-50" />
             <h3 className="font-heading font-bold text-brand-charcoal dark:text-dark-text">
-              Ver Transcrição Completa
+              {t('res_transcript')}
             </h3>
           </div>
           {showTranscript ? <ChevronUp size={20} className="text-slate-400"/> : <ChevronDown size={20} className="text-slate-400"/>}
@@ -143,38 +144,37 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
         
         {showTranscript && (
           <div className="px-6 pb-6 animate-fade-in border-t border-slate-100 dark:border-white/5">
-             <TranscriptionViewer text={result.transcript || "Transcrição indisponível."} />
+             <TranscriptionViewer text={result.transcript} />
           </div>
         )}
       </div>
 
-      {/* Grid de Métricas */}
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-white dark:bg-white/5 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-white/5 flex flex-col items-center justify-center text-center">
-          <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Vícios</div>
+          <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">{t('res_metrics_vices')}</div>
           <span className={`text-xl font-bold ${result.vicios_linguagem_count > 0 ? 'text-brand-coral' : 'text-brand-mint'}`}>
             {result.vicios_linguagem_count}
           </span>
         </div>
         
         <div className="bg-white dark:bg-white/5 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-white/5 flex flex-col items-center justify-center text-center">
-            <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Velocidade</div>
+            <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">{t('res_metrics_speed')}</div>
             <div className="flex flex-col items-center">
                 <span className="text-xl font-bold dark:text-white leading-none">{result.wpm || '-'}</span>
-                <span className="text-[10px] text-slate-400 font-medium" title="Palavras por minuto">pal/min</span>
+                <span className="text-[10px] text-slate-400 font-medium">{t('res_unit_wpm')}</span>
             </div>
         </div>
 
         <div className="bg-white dark:bg-white/5 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-white/5 flex flex-col items-center justify-center text-center">
-          <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Ritmo</div>
+          <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">{t('res_metrics_rhythm')}</div>
           <span className="text-sm font-bold dark:text-white leading-tight">{result.ritmo_analise}</span>
         </div>
 
         <div className="bg-white dark:bg-white/5 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-white/5 flex flex-col items-center justify-center text-center">
-          <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Tom</div>
+          <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">{t('res_metrics_tone')}</div>
           <div className="flex flex-col items-center">
              {getSentimentIcon(result.sentiment)}
-             <span className="text-xs font-bold mt-1 dark:text-white">{result.sentiment || 'Neutro'}</span>
+             <span className="text-xs font-bold mt-1 dark:text-white">{result.sentiment || '-'}</span>
           </div>
         </div>
       </div>
@@ -183,7 +183,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
         <div className="bg-emerald-50/50 dark:bg-emerald-900/10 p-6 rounded-3xl border border-emerald-100 dark:border-emerald-500/10">
           <div className="flex items-center gap-2 mb-3 text-emerald-600 dark:text-emerald-400">
             <CheckCircle2 size={18} />
-            <h3 className="font-bold text-sm uppercase tracking-wide">Ponto Forte</h3>
+            <h3 className="font-bold text-sm uppercase tracking-wide">{t('res_feedback_strong')}</h3>
           </div>
           <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">{result.feedback_positivo}</p>
         </div>
@@ -191,7 +191,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
         <div className="bg-rose-50/50 dark:bg-rose-900/10 p-6 rounded-3xl border border-rose-100 dark:border-rose-500/10">
           <div className="flex items-center gap-2 mb-3 text-rose-600 dark:text-rose-400">
             <AlertCircle size={18} />
-            <h3 className="font-bold text-sm uppercase tracking-wide">Atenção</h3>
+            <h3 className="font-bold text-sm uppercase tracking-wide">{t('res_feedback_improve')}</h3>
           </div>
           <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">{result.ponto_melhoria}</p>
         </div>
@@ -199,7 +199,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
         <div className="bg-brand-purple/5 dark:bg-brand-purple/10 p-6 rounded-3xl border border-brand-purple/10 relative overflow-hidden">
           <div className="flex items-center gap-2 mb-3 text-brand-purple dark:text-brand-primary relative z-10">
             <Sparkles size={18} />
-            <h3 className="font-bold text-sm uppercase tracking-wide">Sugestão da IA</h3>
+            <h3 className="font-bold text-sm uppercase tracking-wide">{t('res_feedback_ai')}</h3>
           </div>
           <p className="text-slate-700 dark:text-slate-300 text-sm italic relative z-10">"{result.frase_reformulada}"</p>
         </div>
@@ -211,7 +211,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
           className="w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-brand-charcoal dark:text-white hover:bg-slate-50 dark:hover:bg-white/10 transition-colors"
         >
           <RotateCcw size={18} />
-          Praticar Novamente
+          {t('btn_retry')}
         </button>
       </div>
     </div>

@@ -3,6 +3,7 @@ import { AnalysisResult } from '../types';
 import { Button } from './Button';
 import { audioStorage } from '../services/audioStorage';
 import { AudioPlayer } from './AudioPlayer';
+import { Download } from 'lucide-react'; // [NOVO] Importar ícone
 
 interface HistoryDetailViewProps {
   result: AnalysisResult;
@@ -32,6 +33,20 @@ export const HistoryDetailView: React.FC<HistoryDetailViewProps> = ({ result, on
       if (audioUrl) URL.revokeObjectURL(audioUrl);
     };
   }, [result.id]);
+
+  // [NOVO] Função de Download
+  const handleDownload = () => {
+    if (!audioUrl) return;
+    
+    const a = document.createElement('a');
+    a.href = audioUrl;
+    // Usa a data para criar um nome único
+    const dateStr = new Date(result.timestamp).toISOString().split('T')[0];
+    a.download = `speakup_treino_${dateStr}.mp3`; 
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-brand-mint dark:text-dark-accent";
@@ -67,10 +82,22 @@ export const HistoryDetailView: React.FC<HistoryDetailViewProps> = ({ result, on
           </div>
         </div>
 
-        {/* Audio Player */}
+        {/* Audio Player com Download */}
         {audioUrl ? (
-          <div className="bg-brand-purple dark:bg-dark-primary p-6 rounded-2xl shadow-glow-purple text-white">
-            <h3 className="text-sm font-bold uppercase tracking-wider opacity-80 mb-3">Ouvir Gravação</h3>
+          <div className="bg-brand-purple dark:bg-dark-primary p-6 rounded-2xl shadow-glow-purple text-white relative">
+            <div className="flex justify-between items-center mb-3">
+                <h3 className="text-sm font-bold uppercase tracking-wider opacity-80">Ouvir Gravação</h3>
+                
+                {/* Botão de Download */}
+                <button 
+                    onClick={handleDownload}
+                    className="p-2 bg-white/20 hover:bg-white/30 rounded-full transition-colors active:scale-95"
+                    title="Baixar áudio"
+                >
+                    <Download size={16} className="text-white" />
+                </button>
+            </div>
+            
             <div className="bg-white/10 rounded-xl p-1">
                <AudioPlayer audioUrl={audioUrl} />
             </div>
@@ -81,7 +108,7 @@ export const HistoryDetailView: React.FC<HistoryDetailViewProps> = ({ result, on
           </div>
         )}
 
-        {/* Details Grid - Atualizado para 3 colunas */}
+        {/* Details Grid */}
         <div className="grid grid-cols-3 gap-3">
           <div className="bg-white dark:bg-dark-surface p-3 rounded-2xl border border-slate-100 dark:border-white/5 text-center">
              <div className="text-[10px] font-bold text-slate-400 uppercase mb-1">Ritmo</div>

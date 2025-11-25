@@ -1,47 +1,50 @@
 import React from 'react';
 import { CoachPersona } from '../types';
 import { Sparkles, Gavel, Laugh, Cpu, Check } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface PersonaSelectorProps {
   current: CoachPersona;
   onSelect: (persona: CoachPersona) => void;
 }
 
-const PERSONAS: { id: CoachPersona; name: string; desc: string; icon: React.ReactNode, color: string }[] = [
-  { 
-    id: 'MOTIVATOR', 
-    name: 'Motivador', 
-    desc: 'Foca no positivo e encoraja.', 
-    icon: <Sparkles size={24} />,
-    color: 'bg-yellow-400'
-  },
-  { 
-    id: 'STRICT', 
-    name: 'Rigoroso', 
-    desc: 'Direto ao ponto, sem rodeios.', 
-    icon: <Gavel size={24} />,
-    color: 'bg-red-500'
-  },
-  { 
-    id: 'FUNNY', 
-    name: 'Divertido', 
-    desc: 'Aprenda rindo com sarcasmo.', 
-    icon: <Laugh size={24} />,
-    color: 'bg-pink-500'
-  },
-  { 
-    id: 'TECHNICAL', 
-    name: 'Técnico', 
-    desc: 'Análise fria e baseada em dados.', 
-    icon: <Cpu size={24} />,
-    color: 'bg-blue-500'
-  }
-];
-
 export const PersonaSelector: React.FC<PersonaSelectorProps> = ({ current, onSelect }) => {
+  const { t } = useLanguage();
+
+  const PERSONAS: { id: CoachPersona; name: string; desc: string; icon: React.ReactNode, color: string }[] = [
+    { 
+      id: 'MOTIVATOR', 
+      name: t('p_motivator_name'), 
+      desc: t('p_motivator_desc'), 
+      icon: <Sparkles size={24} />,
+      color: 'bg-yellow-400'
+    },
+    { 
+      id: 'STRICT', 
+      name: t('p_strict_name'), 
+      desc: t('p_strict_desc'), 
+      icon: <Gavel size={24} />,
+      color: 'bg-red-500'
+    },
+    { 
+      id: 'FUNNY', 
+      name: t('p_funny_name'), 
+      desc: t('p_funny_desc'), 
+      icon: <Laugh size={24} />,
+      color: 'bg-pink-500'
+    },
+    { 
+      id: 'TECHNICAL', 
+      name: t('p_technical_name'), 
+      desc: t('p_technical_desc'), 
+      icon: <Cpu size={24} />,
+      color: 'bg-blue-500'
+    }
+  ];
+
   return (
     <div className="space-y-3">
-      <h3 className="text-lg font-bold text-brand-charcoal dark:text-white px-2">Estilo do Coach</h3>
+      <h3 className="text-lg font-bold text-brand-charcoal dark:text-white px-2">{t('prof_persona')}</h3>
       <div className="grid grid-cols-2 gap-3">
         {PERSONAS.map((p) => {
           const isSelected = current === p.id;
