@@ -11,7 +11,7 @@ if (!apiKey) {
 const genAI = new GoogleGenerativeAI(apiKey || "");
 
 // Modelo 1.5 Flash é o mais rápido e estável para contas gratuitas
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 const API_TIMEOUT_MS = 60000;
 
