@@ -6,35 +6,43 @@ export enum ContextType {
 }
 
 export interface AnalysisResult {
-  id: string;          // Identificador único
-  audioId?: string;    // ID para recuperar o áudio do banco
-  timestamp: number;   // Data
-  context: ContextType; 
+  id: string;
+  audioId?: string;
+  timestamp: number;
+  context: ContextType;
   speech_detected: boolean;
-  
-  // 🔴 NOVO CAMPO OBRIGATÓRIO:
-  transcript: string;  // O texto que a IA transcreveu
-  
+  transcript: string;
   score: number;
   vicios_linguagem_count: number;
   ritmo_analise: 'Muito Rápido' | 'Lento' | 'Ideal';
+  
+  // Novo Campo de Sentimento
+  sentiment?: 'Confiança' | 'Nervosismo' | 'Neutro' | 'Entusiasmo';
+  
   feedback_positivo: string;
   ponto_melhoria: string;
   frase_reformulada: string;
-  
-  // Campo opcional para ajudar o Player de áudio na interface
-  audioUrl?: string; 
+  audioUrl?: string;
 }
 
-export interface AnalysisResponse {
-  result: AnalysisResult | null;
-  error: string | null;
+export interface UserProfile {
+  totalXp: number;
+  level: number;
+  streak: number;
+  lastTrainingDate: string | null; // ISO String
+  badges: string[]; // IDs das medalhas conquistadas
+}
+
+export interface Badge {
+  id: string;
+  name: string;
+  description: string;
+  icon: string; // Emoji ou ícone
+  condition: (profile: UserProfile, history: AnalysisResult[]) => boolean;
 }
 
 export type AppState = 'IDLE' | 'RECORDING' | 'ANALYZING' | 'RESULTS';
-
-// Adicionei 'DETAILS' aqui para facilitar a navegação no App.tsx
-export type TabState = 'PRACTICE' | 'HISTORY' | 'DETAILS';
+export type TabState = 'PRACTICE' | 'HISTORY' | 'DETAILS' | 'PROFILE'; // Nova aba Profile
 
 export interface NavigationState {
   view: TabState;

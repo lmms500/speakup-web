@@ -2,17 +2,15 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { AnalysisResult, ContextType } from "../types";
 
 // 🟢 VOLTAMOS PARA O MODO SEGURO:
-// A chave virá do arquivo .env (local) ou das Configurações da Vercel (online)
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
-// Validação de segurança para te avisar no console se esquecer a chave
 if (!apiKey) {
   console.error("ERRO CRÍTICO: Chave de API não encontrada. Configure VITE_GEMINI_API_KEY no .env ou na Vercel.");
 }
 
 const genAI = new GoogleGenerativeAI(apiKey || "");
 
-// 🟢 MODELO ESTÁVEL: Usando 1.5 Flash para garantir que funcione sem erro 404/503
+// 🟢 MODELO ESTÁVEL
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 const API_TIMEOUT_MS = 60000;
@@ -61,7 +59,8 @@ export const analyzeAudio = async (
         "transcript": "texto transcrito",
         "score": number,
         "vicios_linguagem_count": number,
-        "ritmo_analise": "Ideal",
+        "ritmo_analise": "Ideal" | "Lento" | "Muito Rápido",
+        "sentiment": "Confiança" | "Nervosismo" | "Neutro" | "Entusiasmo",
         "feedback_positivo": "texto",
         "ponto_melhoria": "texto",
         "frase_reformulada": "texto"

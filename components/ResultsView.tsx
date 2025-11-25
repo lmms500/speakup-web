@@ -3,7 +3,7 @@ import { AnalysisResult } from '../types';
 import { AudioPlayer } from './AudioPlayer';
 import { TranscriptionViewer } from './TranscriptionViewer';
 import { ShareModal } from './ShareModal';
-import { RotateCcw, CheckCircle2, AlertCircle, Sparkles, MicOff, Quote, ChevronDown, ChevronUp, Share2 } from 'lucide-react';
+import { RotateCcw, CheckCircle2, AlertCircle, Sparkles, MicOff, Quote, ChevronDown, ChevronUp, Share2, Smile, Frown, Meh, Zap } from 'lucide-react';
 
 interface ResultsViewProps {
   result: AnalysisResult | null;
@@ -25,7 +25,16 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
     }
   }, [audioBlob]);
 
-  // --- LOADING STATE ---
+  // Helper para ícone de sentimento
+  const getSentimentIcon = (sentiment?: string) => {
+    switch(sentiment) {
+      case 'Confiança': return <Zap size={24} className="text-yellow-500" />;
+      case 'Entusiasmo': return <Smile size={24} className="text-brand-mint" />;
+      case 'Nervosismo': return <Frown size={24} className="text-brand-coral" />;
+      default: return <Meh size={24} className="text-slate-400" />;
+    }
+  };
+
   if (isLoading || !result) {
     return (
       <div className="w-full max-w-md mx-auto animate-fade-in space-y-6 pb-6 pt-2">
@@ -45,7 +54,6 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
     );
   }
 
-  // --- ERROR STATE (NO SPEECH) ---
   if (!result.speech_detected) {
     return (
       <div className="w-full max-w-md mx-auto animate-fade-in space-y-8 pb-6 text-center">
@@ -69,7 +77,6 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
     );
   }
 
-  // Define cores baseadas na nota
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-brand-mint dark:text-dark-accent";
     if (score >= 60) return "text-amber-500 dark:text-amber-400";
@@ -79,7 +86,6 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
   return (
     <div className="w-full max-w-md mx-auto animate-fade-in space-y-6 pb-20 text-brand-charcoal dark:text-dark-text relative">
       
-      {/* Botão Flutuante de Compartilhar */}
       <div className="absolute top-0 right-0 z-10">
         <button 
           onClick={() => setShowShareModal(true)}
@@ -90,7 +96,6 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
         </button>
       </div>
 
-      {/* Renderização do Modal */}
       {showShareModal && (
         <ShareModal 
           score={result.score} 
@@ -99,7 +104,6 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
         />
       )}
       
-      {/* Placar Circular Animado */}
       <div className="text-center mt-2 relative">
         <div className="relative inline-flex justify-center items-center">
           <svg className="w-48 h-48 transform -rotate-90">
@@ -118,14 +122,12 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
         </div>
       </div>
 
-      {/* Player de Áudio */}
       {audioUrl && (
         <div className="px-1">
           <AudioPlayer audioUrl={audioUrl} />
         </div>
       )}
 
-      {/* Transcrição Expansível */}
       <div className="bg-white dark:bg-dark-surface rounded-3xl shadow-soft dark:shadow-none border border-slate-100 dark:border-white/5 transition-colors overflow-hidden">
         <button 
           onClick={() => setShowTranscript(!showTranscript)}
@@ -147,24 +149,29 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ result, isLoading = fa
         )}
       </div>
 
-      {/* Grid de Estatísticas Rápidas */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white dark:bg-white/5 p-5 rounded-2xl shadow-soft dark:shadow-none border border-slate-100 dark:border-white/5">
-          <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-2">Vícios</div>
-          <div className="flex items-baseline gap-1">
-            <span className={`text-2xl font-bold ${result.vicios_linguagem_count > 0 ? 'text-brand-coral' : 'text-brand-mint'}`}>
-              {result.vicios_linguagem_count}
-            </span>
-            <span className="text-xs text-slate-500">encontrados</span>
-          </div>
+      <div className="grid grid-cols-3 gap-3">
+        <div className="bg-white dark:bg-white/5 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-white/5 flex flex-col items-center justify-center text-center">
+          <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Vícios</div>
+          <span className={`text-xl font-bold ${result.vicios_linguagem_count > 0 ? 'text-brand-coral' : 'text-brand-mint'}`}>
+            {result.vicios_linguagem_count}
+          </span>
         </div>
-        <div className="bg-white dark:bg-white/5 p-5 rounded-2xl shadow-soft dark:shadow-none border border-slate-100 dark:border-white/5">
-          <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-2">Ritmo</div>
-          <div className="text-lg font-bold dark:text-white">{result.ritmo_analise}</div>
+        
+        <div className="bg-white dark:bg-white/5 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-white/5 flex flex-col items-center justify-center text-center">
+          <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Ritmo</div>
+          <span className="text-sm font-bold dark:text-white leading-tight">{result.ritmo_analise}</span>
+        </div>
+
+        {/* Card de Sentimento */}
+        <div className="bg-white dark:bg-white/5 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-white/5 flex flex-col items-center justify-center text-center">
+          <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Tom</div>
+          <div className="flex flex-col items-center">
+             {getSentimentIcon(result.sentiment)}
+             <span className="text-xs font-bold mt-1 dark:text-white">{result.sentiment || 'Neutro'}</span>
+          </div>
         </div>
       </div>
 
-      {/* Cards de Feedback Detalhado */}
       <div className="space-y-4">
         <div className="bg-emerald-50/50 dark:bg-emerald-900/10 p-6 rounded-3xl border border-emerald-100 dark:border-emerald-500/10">
           <div className="flex items-center gap-2 mb-3 text-emerald-600 dark:text-emerald-400">
