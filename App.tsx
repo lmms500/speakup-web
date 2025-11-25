@@ -9,26 +9,36 @@ import { HistoryDetailView } from './components/HistoryDetailView';
 import { AudioRecorder } from './components/AudioRecorder';
 import { useTheme } from './context/ThemeContext';
 import { InstallPrompt } from './components/InstallPrompt'; 
-import { ProfileView } from './components/ProfileView'; // Importe a view
-import { ChevronDown, Moon, Sun, LayoutGrid, History, Mic, XCircle, Flame, User } from 'lucide-react';
+import { ProfileView } from './components/ProfileView'; 
+// Adicionei o ícone Trophy e CheckCircle
+import { ChevronDown, Moon, Sun, LayoutGrid, History, Mic, XCircle, Flame, User, Trophy, CheckCircle } from 'lucide-react';
+
+// Tipo para a notificação
+interface NotificationState {
+  message: string;
+  type: 'error' | 'success';
+}
 
 function App() {
   const [navState, setNavState] = useState<NavigationState>({ view: 'PRACTICE' });
   const [appState, setAppState] = useState<AppState>('IDLE');
   const [selectedContext, setSelectedContext] = useState<ContextType>(ContextType.INTERVIEW);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [streak, setStreak] = useState(0);
   
+  // Estado unificado de notificação
+  const [notification, setNotification] = useState<NotificationState | null>(null);
+  
+  const [streak, setStreak] = useState(0);
   const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     setStreak(storageService.getStreak());
   }, [appState]);
 
-  const showError = (msg: string) => {
-    setErrorMessage(msg);
-    setTimeout(() => setErrorMessage(null), 5000);
+  // Função genérica para mostrar notificações
+  const showNotification = (message: string, type: 'error' | 'success' = 'error') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 5000);
   };
 
   const handleRecordingStop = async (audioBlob: Blob) => {
@@ -38,13 +48,12 @@ function App() {
       const result = await analyzeAudio(audioBlob, selectedContext);
       
       if (result.speech_detected) {
-        // O storageService agora retorna novas medalhas
         const { newBadges } = await storageService.saveResult(result, audioBlob);
         
+        // 🎉 Lógica de Sucesso: Nova Medalha
         if (newBadges.length > 0) {
            const names = newBadges.map(b => b.name).join(', ');
-           // Mostra um aviso se ganhou medalha (pode ser melhorado para um modal próprio)
-           showError(`🏆 Nova Conquista Desbloqueada: ${names}!`); 
+           showNotification(`Nova Conquista: ${names}!`, 'success');
         }
       }
 
@@ -53,7 +62,7 @@ function App() {
     } catch (error: any) {
       console.error(error);
       const errorMsg = error.userMessage || "Erro ao analisar áudio. Tente novamente.";
-      showError(errorMsg);
+      showNotification(errorMsg, 'error'); // Mostra como erro
       setAppState('IDLE');
     }
   };
@@ -125,11 +134,28 @@ function App() {
   return (
     <div className="fixed inset-0 flex flex-col items-center bg-brand-offwhite dark:bg-dark-bg text-brand-charcoal dark:text-dark-text overflow-hidden font-sans transition-colors duration-300 selection:bg-brand-purple selection:text-white">
       
-      {/* Toast de Erro / Notificação */}
-      {errorMessage && (
-        <div className="absolute top-4 left-4 right-4 bg-brand-coral text-white p-4 rounded-xl shadow-lg z-50 animate-fade-in flex items-center gap-3">
-          <XCircle size={24} />
-          <p className="font-medium text-sm">{errorMessage}</p>
+      {/* --- SISTEMA DE NOTIFICAÇÃO MELHORADO --- */}
+      {notification && (
+        <div className={`
+          absolute top-4 left-4 right-4 p-4 rounded-2xl shadow-2xl z-50 animate-fade-in flex items-center gap-4 border
+          ${notification.type === 'error' 
+            ? 'bg-brand-coral text-white border-red-400' 
+            : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-white/20 shadow-glow-purple'}
+        `}>
+          {/* Ícone Dinâmico */}
+          <div className={`
+            p-2 rounded-full shrink-0
+            ${notification.type === 'error' ? 'bg-white/20' : 'bg-white/20 backdrop-blur-md'}
+          `}>
+            {notification.type === 'error' ? <XCircle size={24} /> : <Trophy size={24} className="text-yellow-300 drop-shadow-sm" />}
+          </div>
+          
+          <div className="flex-1">
+            <h4 className="font-bold text-sm uppercase tracking-wide opacity-90">
+              {notification.type === 'error' ? 'Algo deu errado' : 'Parabéns!'}
+            </h4>
+            <p className="font-medium text-sm leading-snug">{notification.message}</p>
+          </div>
         </div>
       )}
 
