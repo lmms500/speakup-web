@@ -12,7 +12,8 @@ import { useTheme, ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { InstallPrompt } from './components/InstallPrompt'; 
 import { ProfileView } from './components/ProfileView'; 
-import { Onboarding } from './components/Onboarding'; // [NOVO]
+import { Onboarding } from './components/Onboarding';
+import { ReloadPrompt } from './components/ReloadPrompt'; // [NOVO] Importar componente de atualização
 import { ChevronDown, Moon, Sun, LayoutGrid, History, Mic, XCircle, Flame, User, Trophy, Dices } from 'lucide-react';
 import { TRANSLATIONS, TranslationKey } from './i18n/translations';
 
@@ -35,7 +36,7 @@ const MainApp = () => {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [notification, setNotification] = useState<NotificationState | null>(null);
   const [streak, setStreak] = useState(0);
-  const [showOnboarding, setShowOnboarding] = useState(false); // [NOVO]
+  const [showOnboarding, setShowOnboarding] = useState(false);
   
   const { theme, toggleTheme } = useTheme();
   const { t, language } = useLanguage();
@@ -223,6 +224,7 @@ function App() {
   return (
     <ThemeProvider>
       <LanguageProvider>
+        <ReloadPrompt /> {/* [NOVO] Garante atualizações limpas */}
         <MainApp />
       </LanguageProvider>
     </ThemeProvider>
