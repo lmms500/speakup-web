@@ -10,10 +10,10 @@ import { AudioRecorder } from './components/AudioRecorder';
 import { useTheme } from './context/ThemeContext';
 import { InstallPrompt } from './components/InstallPrompt'; 
 import { ProfileView } from './components/ProfileView'; 
-// Adicionei o ícone Trophy e CheckCircle
+// Adicionei o ícone Trophy e CheckCircle para as conquistas
 import { ChevronDown, Moon, Sun, LayoutGrid, History, Mic, XCircle, Flame, User, Trophy, CheckCircle } from 'lucide-react';
 
-// Tipo para a notificação
+// Novo tipo para gerir o estado da notificação
 interface NotificationState {
   message: string;
   type: 'error' | 'success';
@@ -25,7 +25,7 @@ function App() {
   const [selectedContext, setSelectedContext] = useState<ContextType>(ContextType.INTERVIEW);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   
-  // Estado unificado de notificação
+  // Estado unificado de notificação (substitui errorMessage)
   const [notification, setNotification] = useState<NotificationState | null>(null);
   
   const [streak, setStreak] = useState(0);
@@ -35,7 +35,7 @@ function App() {
     setStreak(storageService.getStreak());
   }, [appState]);
 
-  // Função genérica para mostrar notificações
+  // Função genérica melhorada para mostrar notificações
   const showNotification = (message: string, type: 'error' | 'success' = 'error') => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 5000);
@@ -48,12 +48,13 @@ function App() {
       const result = await analyzeAudio(audioBlob, selectedContext);
       
       if (result.speech_detected) {
+        // O storageService retorna as novas medalhas ganhas neste treino
         const { newBadges } = await storageService.saveResult(result, audioBlob);
         
-        // 🎉 Lógica de Sucesso: Nova Medalha
+        // 🎉 Lógica de Sucesso: Se ganhou medalha, mostra o Toast Bonito
         if (newBadges.length > 0) {
            const names = newBadges.map(b => b.name).join(', ');
-           showNotification(`Nova Conquista: ${names}!`, 'success');
+           showNotification(`Nova Conquista Desbloqueada: ${names}!`, 'success');
         }
       }
 
@@ -62,7 +63,7 @@ function App() {
     } catch (error: any) {
       console.error(error);
       const errorMsg = error.userMessage || "Erro ao analisar áudio. Tente novamente.";
-      showNotification(errorMsg, 'error'); // Mostra como erro
+      showNotification(errorMsg, 'error'); // Mostra como erro (vermelho)
       setAppState('IDLE');
     }
   };
@@ -86,6 +87,7 @@ function App() {
       if (detailItem) return <HistoryDetailView result={detailItem} onBack={handleBackFromDetail} />;
     }
     
+    // Renderiza a nova tela de Perfil
     if (navState.view === 'PROFILE') return <ProfileView />;
 
     if (navState.view === 'HISTORY') return <HistoryView onSelectDetail={handleSelectDetail} />;

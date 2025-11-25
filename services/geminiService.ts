@@ -1,17 +1,17 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { AnalysisResult, ContextType } from "../types";
 
-// 🟢 VOLTAMOS PARA O MODO SEGURO:
+// Recupera a chave das variáveis de ambiente
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
 if (!apiKey) {
-  console.error("ERRO CRÍTICO: Chave de API não encontrada. Configure VITE_GEMINI_API_KEY no .env ou na Vercel.");
+  console.error("ERRO CRÍTICO: Chave de API não encontrada. Configure VITE_GEMINI_API_KEY.");
 }
 
 const genAI = new GoogleGenerativeAI(apiKey || "");
 
-// 🟢 MODELO ESTÁVEL
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+// Modelo 1.5 Flash é o mais rápido e estável para contas gratuitas
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 const API_TIMEOUT_MS = 60000;
 
@@ -40,11 +40,11 @@ export const analyzeAudio = async (
 ): Promise<AnalysisResult> => {
   
   if (!navigator.onLine) {
-    throw new AppError("Offline", "Verifique sua conexão.");
+    throw new AppError("Offline", "Sem internet. Verifique a sua conexão e tente novamente.");
   }
 
   if (!apiKey) {
-    throw new AppError("Config Error", "Chave de API não configurada. Avise o administrador.");
+    throw new AppError("Config Error", "O sistema está sem a Chave de API. Avise o suporte.");
   }
 
   try {
@@ -90,15 +90,46 @@ export const analyzeAudio = async (
     } as AnalysisResult;
 
   } catch (error: any) {
-    console.error("Erro Gemini:", error);
+    console.error("Erro Gemini Detalhado:", error);
     
+    // --- TRATAMENTO DE ERROS PERSONALIZADO ---
+
+    // Erro 503: Servidor do Google Sobrecarregado
+    if (error.message?.includes("503")) {
+        throw new AppError(
+            "Service Overloaded", 
+            "Os servidores da IA do Google estão com muito tráfego agora. Aguarde 1 minuto e tente novamente."
+        );
+    }
+
+    // Erro 403: Chave Bloqueada ou Vazada
     if (error.message?.includes("403")) {
-        throw new AppError("Auth Error", "Chave de API bloqueada ou vazada. Gere uma nova no Google AI Studio.");
+        throw new AppError(
+            "Auth Error", 
+            "Acesso negado pela segurança do Google. A chave de API precisa ser trocada."
+        );
     }
+
+    // Erro 404: Modelo não encontrado
     if (error.message?.includes("404")) {
-        throw new AppError("Model Error", "Erro de modelo. Verifique a disponibilidade do Gemini 1.5 Flash.");
+        throw new AppError(
+            "Model Error", 
+            "Erro interno de modelo (404). A versão da IA está indisponível na sua região."
+        );
+    }
+
+    // Erro 400: Chave Inválida
+    if (error.message?.includes("400")) {
+        throw new AppError(
+            "Key Error", 
+            "A chave de API parece inválida. Verifique as configurações."
+        );
     }
     
-    throw new AppError("Erro na IA", "Não foi possível analisar o áudio.");
+    // Erro Genérico
+    throw new AppError(
+        "Unknown Error", 
+        "Ocorreu um erro inesperado na análise. Tente gravar um áudio mais curto."
+    );
   }
 };
